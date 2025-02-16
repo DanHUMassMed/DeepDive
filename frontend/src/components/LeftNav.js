@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import ConfigContext from './ConfigContext';
+
 import { IoIosSearch } from 'react-icons/io';
 
-const LeftNav = ({ isOpen }) => {
+const LeftNav = () => {
+  const { config, setConfig  } = useContext(ConfigContext);
   const chatHistory = [
     { id: 1, title: 'Chat 1', model: 'llama3.2', dateTime: '2025-02-09 12:00 PM' },
     { id: 2, title: 'Chat 2', model: 'gpt-4', dateTime: '2025-02-08 09:30 AM' },
@@ -11,9 +14,9 @@ const LeftNav = ({ isOpen }) => {
 
   return (
     <div
-      className={`transition-all duration-300 ${isOpen ? 'w-64' : 'w-0'} bg-gray-200 h-full text-black overflow-hidden`}
+      className={`transition-all duration-300 ${config.isLeftNavOpen ? 'w-64' : 'w-0'} bg-gray-200 h-full text-black overflow-hidden`}
       style={{
-        zIndex: isOpen ? 10 : -1,  // Ensures it's above content when open
+        zIndex: config.isLeftNavOpen ? 10 : -1,  // Ensures it's above content when open
       }}
     >
       <SearchBar />

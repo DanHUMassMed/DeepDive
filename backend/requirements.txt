@@ -2,4 +2,6 @@ fastapi
 starlette
 langchain
 langchain-community
-uvicorn
+uvicorn[standard]
+pytest
+

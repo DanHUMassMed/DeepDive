@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import ConfigContext from './ConfigContext';
+
 import { VscLayoutSidebarLeft, VscLayoutSidebarLeftOff, VscLayoutSidebarRight, VscLayoutSidebarRightOff } from 'react-icons/vsc';
 import { HiOutlinePencilSquare } from "react-icons/hi2";
 import { FaCheck } from 'react-icons/fa';
 import { IoChevronDownOutline } from "react-icons/io5";
+
 
 const SelectModel = () => {
   const [selectedModel, setSelectedModel] = useState('');
@@ -58,7 +61,24 @@ const SelectModel = () => {
   );
 };
 
-const TopNav = ({ isLeftSidebarOpen, toggleLeftSidebar, isRightSidebarOpen, toggleRightSidebar, onNewChat }) => {
+const TopNav = ({ onNewChat }) => {
+  const { config, setConfig  } = useContext(ConfigContext);
+
+  const toggleLeftNav = () => {
+    setConfig((prevConfig) => ({
+      ...prevConfig,
+      isLeftNavOpen: !prevConfig.isLeftNavOpen,
+    }));
+  };
+
+  const toggleRightNav = () => {
+    setConfig((prevConfig) => ({
+      ...prevConfig,
+      isRightNavOpen: !prevConfig.isRightNavOpen,
+    }));
+    console.log('toggleRightNav',config.isRightNavOpen);
+  };
+
   return (
     <div className="flex justify-between items-center h-10 px-4 bg-gray-300 text-black">
       {/* New Chat button on the left */}
@@ -73,18 +93,18 @@ const TopNav = ({ isLeftSidebarOpen, toggleLeftSidebar, isRightSidebarOpen, togg
 
       {/* Sidebar buttons on the right */}
       <div className="flex space-x-2">
-        <button onClick={toggleLeftSidebar} className="focus:outline-none px-1">
-          {isLeftSidebarOpen ? (
-            <VscLayoutSidebarLeftOff size={24} color="black" />
-          ) : (
+        <button onClick={toggleLeftNav} className="focus:outline-none px-1">
+          {config.isLeftNavOpen ? (
             <VscLayoutSidebarLeft size={24} color="black" />
+          ) : (
+            <VscLayoutSidebarLeftOff size={24} color="black" />
           )}
         </button>
-        <button onClick={toggleRightSidebar} className="focus:outline-none px-1">
-          {isRightSidebarOpen ? (
-            <VscLayoutSidebarRightOff size={24} color="black" />
-          ) : (
+        <button onClick={toggleRightNav} className="focus:outline-none px-1">
+          {config.isRightNavOpen ? (
             <VscLayoutSidebarRight size={24} color="black" />
+          ) : (
+            <VscLayoutSidebarRightOff size={24} color="black" />
           )}
         </button>
       </div>

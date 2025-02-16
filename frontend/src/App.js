@@ -1,35 +1,25 @@
 // src/App.js
-import React, { useState } from 'react';
+import React, { useState, createContext } from 'react';
+import TopNav from './components/TopNav';
 import LeftNav from './components/LeftNav';
 import RightNav from './components/RightNav';
 import DialogContainer from './components/DialogContainer';
-import TopNav from './components/TopNav';
+import { ConfigProvider, useConfig } from './components/ConfigContext';
 
 
 function App() {
-  const [isLeftNavOpen, setIsLeftNavOpen] = useState(true);
-  const [isRightNavOpen, setIsRightNavOpen] = useState(false); // State for right nav
-
-  const toggleLeftNav = () => {
-    setIsLeftNavOpen((prevState) => !prevState);
-  };
-
-  const toggleRightNav = () => {
-    setIsRightNavOpen((prevState) => !prevState); // Toggle the right nav state
-  };
 
 
   return (
     <div className="flex h-screen flex-col">
-      <TopNav isLeftSidebarOpen={isLeftNavOpen} 
-            toggleLeftSidebar={toggleLeftNav} 
-            isRightSidebarOpen={isRightNavOpen} 
-            toggleRightSidebar={toggleRightNav} />
+      <ConfigProvider>
+      <TopNav/>
       <div className="flex flex-grow">
-        <LeftNav isOpen={isLeftNavOpen} />
+        <LeftNav />
         <DialogContainer />
-        <RightNav isOpen={isRightNavOpen} /> 
+        <RightNav /> 
       </div>
+      </ConfigProvider>
     </div>
   );
 }
