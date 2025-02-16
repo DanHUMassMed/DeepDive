@@ -1,7 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useContext } from 'react';
+import ConfigContext from '../components/ConfigContext';
 
-const useChatEffect = (messageToSend, setChatHistory, setIsProcessing) => {
+const useChatEffect = (messageToSend, setChatHistory) => {
+  const { config, setConfig  } = useContext(ConfigContext);
+
   const websocketRef = useRef(null);
+  const setIsProcessing = (isProcessing) => {
+    setConfig((prevConfig) => ({...prevConfig, isProcessingPrompt: isProcessing}));
+  }
 
   const closeWebSocket = () => {
     if (websocketRef.current) {
@@ -27,6 +33,7 @@ const useChatEffect = (messageToSend, setChatHistory, setIsProcessing) => {
 
       websocketRef.current.onopen = () => {
         setIsProcessing(true);
+        console.log("websocketRef.current.send(messageToSend);")
         websocketRef.current.send(messageToSend);
       };
 
@@ -66,7 +73,7 @@ const useChatEffect = (messageToSend, setChatHistory, setIsProcessing) => {
       
 
     };
-  }, [messageToSend, setChatHistory, setIsProcessing]);
+  }, [messageToSend, setChatHistory]);
 
   return { closeWebSocket };
 };

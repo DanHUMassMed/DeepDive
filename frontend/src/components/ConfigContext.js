@@ -19,6 +19,8 @@ export const ConfigProvider = ({ children }) => {
     theme: 'dark',
     isLeftNavOpen: true,
     isRightNavOpen: false,
+    isPromptTextEntered: false,
+    isProcessingPrompt: false
   });
 
   return (

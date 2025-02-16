@@ -1,42 +1,49 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
+import ConfigContext from './ConfigContext';
 import { CiGlobe } from 'react-icons/ci';
-import { IoBulbOutline, IoArrowUpCircle } from 'react-icons/io5';
+import { IoBulbOutline, IoArrowUpCircle, IoStop } from 'react-icons/io5';
+
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { dark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import useChatEffect from '../hooks/useChatEffect';
+import axios from 'axios';
 
 
 // DialogContainer Component - Main container for the chat UI
 const DialogContainer = () => {
+  const { config, setConfig  } = useContext(ConfigContext);
+
   const textareaRef = useRef(null);
   const [chatHistory, setChatHistory] = useState([]);  
   const [messageToSend, setMessageToSend] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false); 
-
+  
   // Use the custom hook
-  const { closeWebSocket } = useChatEffect(messageToSend, setChatHistory, setIsProcessing);
+  const { closeWebSocket } = useChatEffect(messageToSend, setChatHistory);
   
 
-  const handleKeyDown = (e) => {
+  const handleSendPrompt = (e) => {
+    //TODO: If you send the exact prompt twice the second prompt will not trigger an update
+    // and this will not call the chat server
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault(); // Prevent form submission
       const userMessage = textareaRef.current.value;
-      if (!userMessage.trim() || isProcessing) return;
+      if (!userMessage.trim() || config.isProcessingPrompt) return;
 
       // Add the user's message to the chat history
       setChatHistory((prev) => [...prev, { type: 'user', content: userMessage }]);
 
       // Send the user's message to the server
+      setConfig((prevConfig) => ({...prevConfig, isPromptTextEntered: false}));
       setMessageToSend(userMessage);
-      textareaRef.current.value = '';  
+      textareaRef.current.value = '';
     }
   };
 
 
   const handleStopMessage = (e) => {
     e.preventDefault();
-    if (isProcessing) {
+    if (config.isProcessingPrompt) {
       try {
         // Call the FastAPI cancel endpoint when [STOP] message is detected
         const response = axios.post('http://localhost:8000/cancel-stream');
@@ -51,7 +58,9 @@ const DialogContainer = () => {
   return (
     <div className="w-full h-full p-4 flex flex-col justify-end">
       <ChatWindow chatHistory={chatHistory} />
-      <ChatPrompt textareaRef={textareaRef} handleKeyDown={handleKeyDown} />
+      <ChatPrompt textareaRef={textareaRef} 
+                  handleSendPrompt={handleSendPrompt} 
+                  handleStopMessage={handleStopMessage} />
     </div>
   );
 };
@@ -143,26 +152,25 @@ const AIDialog = ({ interaction }) => {
 };
 
 // ChatPrompt Component - Textarea for user input
-function ChatPrompt({ textareaRef, handleKeyDown }) {
-
-  const [isTextEntered, setIsTextEntered] = useState(false);
-
-  const handlePromptInput = () => {
+function ChatPrompt({ textareaRef, handleSendPrompt, handleStopMessage }) {
+  const { config, setConfig  } = useContext(ConfigContext);
+  
+  const handleOnChangePrompt = () => {
     const textarea = textareaRef.current;
     textarea.style.height = 'auto'; // Reset height to auto before resizing
     textarea.style.height = `${textarea.scrollHeight}px`; // Set height to scrollHeight
-    setIsTextEntered(textarea.value.trim().length > 0);
-
+    setConfig((prevConfig) => ({...prevConfig, isPromptTextEntered: (textarea.value.trim().length > 0)}));
   };
 
   return (
     <div className="flex flex-col w-full">
       <textarea
         ref={textareaRef}
-        id="chat-textarea"
+        id="prompt-textarea"
         className="w-full p-2 border border-gray-300 rounded-md resize-none overflow-hidden"
-        placeholder="Enter your prompt here..."
-        onKeyDown={handleKeyDown} // Handle key down event
+        placeholder={config.isProcessingPrompt ? 'Processing your request please wait ...' : 'Enter your prompt here...'}
+        onKeyDown={handleSendPrompt} // Handle key down event
+        onChange={handleOnChangePrompt}
       />
 
       <div className="flex items-center justify-between w-full mt-2"> 
@@ -179,18 +187,33 @@ function ChatPrompt({ textareaRef, handleKeyDown }) {
         </div>
 
         {/* Right-aligned button */}
-        <button
-          className="flex items-center space-x-2"
-          disabled={!isTextEntered}
-        >
-          <IoArrowUpCircle 
-            color={isTextEntered ? 'blue' : 'gray'}
-            size={24}
-          />
-        </button>
+        <ChatPromptButton handleStopMessage={handleStopMessage}/>
       </div>
     </div>
   );
 }
+
+const ChatPromptButton = ({ handleStopMessage }) => {
+  const { config, setConfig  } = useContext(ConfigContext);
+  return ( <button
+        className="flex items-center space-x-2"
+        disabled={!config.isProcessingPrompt}
+        onClick={handleStopMessage}
+      >
+        {config.isProcessingPrompt ? (
+              <IoStop 
+              color='blue'
+              size={24}
+            />
+            ) : (
+              <IoArrowUpCircle 
+              color={config.isPromptTextEntered ? 'blue' : 'gray'}
+              size={24}
+            />
+            )
+        }
+      </button>
+    );
+};
 
 export default DialogContainer;
