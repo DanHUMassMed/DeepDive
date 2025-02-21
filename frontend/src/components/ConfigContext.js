@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Create the ConfigContext
 const ConfigContext = createContext();
@@ -12,16 +12,34 @@ export const useConfig = () => {
   return context;
 };
 
+// Default configuration values
+const defaultConfig = {
+  apiUrl: 'http://127.0.0.1:8000/',
+  theme: 'dark',
+  project_id: 'deep-dive',
+  active_chat_id:'',
+  isLeftNavOpen: true,
+  isRightNavOpen: false,
+  isPromptTextEntered: false,
+  isProcessingPrompt: false,
+};
+
 // ConfigProvider component
 export const ConfigProvider = ({ children }) => {
-  const [config, setConfig] = useState({
-    apiUrl: 'http://127.0.0.1:8000/',
-    theme: 'dark',
-    isLeftNavOpen: true,
-    isRightNavOpen: false,
-    isPromptTextEntered: false,
-    isProcessingPrompt: false
-  });
+  const [config, setConfig] = useState(defaultConfig);
+
+  // Load config from localStorage or use default config
+  useEffect(() => {
+    const storedConfig = localStorage.getItem('appConfig');
+    if (storedConfig) {
+      setConfig(JSON.parse(storedConfig));
+    }
+  }, []);
+
+  // Save config to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('appConfig', JSON.stringify(config));
+  }, [config]);
 
   return (
     <ConfigContext.Provider value={{ config, setConfig }}>

@@ -1,10 +1,11 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import ConfigContext from './ConfigContext';
 
 import { VscLayoutSidebarLeft, VscLayoutSidebarLeftOff, VscLayoutSidebarRight, VscLayoutSidebarRightOff } from 'react-icons/vsc';
 import { HiOutlinePencilSquare } from "react-icons/hi2";
 import { FaCheck } from 'react-icons/fa';
 import { IoChevronDownOutline } from "react-icons/io5";
+import { createNewChat } from "../api/chatAPI"
 
 
 const SelectModel = () => {
@@ -61,7 +62,7 @@ const SelectModel = () => {
   );
 };
 
-const TopNav = ({ onNewChat }) => {
+const TopNav = () => {
   const { config, setConfig  } = useContext(ConfigContext);
 
   const toggleLeftNav = () => {
@@ -76,8 +77,24 @@ const TopNav = ({ onNewChat }) => {
       ...prevConfig,
       isRightNavOpen: !prevConfig.isRightNavOpen,
     }));
+
     console.log('toggleRightNav',config.isRightNavOpen);
   };
+
+  const onNewChat = async (e) => {
+    const newChat = await createNewChat(config.project_id)
+    setConfig((prevConfig) => ({
+      ...prevConfig,
+      active_chat_id: newChat['chat_id'],
+    }));
+    //alert(newChat['chat_id']);
+
+  };
+  
+  // useEffect(() => {
+  //   alert(JSON.stringify(config, null, 2));
+  // }, [config]); // This will run every time `config` is updated
+
 
   return (
     <div className="flex justify-between items-center h-10 px-4 bg-gray-300 text-black">

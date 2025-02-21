@@ -27,13 +27,3 @@ Initialize()
 
 SelectModel()
 
-NewChat() {
-   addToChatHistory()
-   initializeChat()
-}
-
-DeleteChats()
-
-Chat() {
-   submitChat
-}

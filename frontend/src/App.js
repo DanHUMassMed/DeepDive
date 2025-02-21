@@ -1,21 +1,21 @@
 // src/App.js
-import React, { useState, createContext } from 'react';
+import React, { useState, useEffect, createContext } from 'react';
 import TopNav from './components/TopNav';
 import LeftNav from './components/LeftNav';
 import RightNav from './components/RightNav';
 import DialogContainer from './components/DialogContainer';
+import { getChatHistory } from './api/chatAPI';
 import { ConfigProvider, useConfig } from './components/ConfigContext';
 
 
 function App() {
 
-
   return (
     <div className="flex h-screen flex-col">
       <ConfigProvider>
-      <TopNav/>
+      <TopNav />
       <div className="flex flex-grow">
-        <LeftNav />
+        <LeftNav/>
         <DialogContainer />
         <RightNav /> 
       </div>

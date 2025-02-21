@@ -1,16 +1,31 @@
-import React, { useState, useContext } from 'react';
+import React, { useRef, useState, useContext, useEffect } from 'react';
 import ConfigContext from './ConfigContext';
-
+import ChatHistoryItem from './ChatHistoryItem';
 import { IoIosSearch } from 'react-icons/io';
+import { getChatHistory } from "../api/chatAPI"
 
 const LeftNav = () => {
   const { config, setConfig  } = useContext(ConfigContext);
-  const chatHistory = [
-    { id: 1, title: 'Chat 1', model: 'llama3.2', dateTime: '2025-02-09 12:00 PM' },
-    { id: 2, title: 'Chat 2', model: 'gpt-4', dateTime: '2025-02-08 09:30 AM' },
-    { id: 3, title: 'Chat 3', model: 'bert-base', dateTime: '2025-02-07 11:45 AM' },
-    // Add more chat history items as needed
-  ];
+  const [chatHistory, setChatHistory] = useState([]);
+
+  useEffect(() => {
+    const fetchChatHistory = async () => {
+      try {
+        const chatHistoryServer = await getChatHistory(config.project_id);
+        setChatHistory(chatHistoryServer);
+        // You can uncomment these if you need them
+        // alert(chatHistoryServer.length);
+        //alert("Left Nav");
+        // alert(JSON.stringify(chatHistoryServer, null, 2));
+      } catch (error) {
+        console.error('Error fetching chat history:', error);
+      }
+    };
+
+    if (config.project_id) {
+      fetchChatHistory();
+    }
+  }, [config.active_chat_id])
 
   return (
     <div
@@ -20,7 +35,7 @@ const LeftNav = () => {
       }}
     >
       <SearchBar />
-      <div className="p-2">
+      <div className="p-2 max-h-[calc(100vh-64px)] overflow-y-auto">
         {chatHistory.map((chat) => (
           <ChatHistoryItem key={chat.id} chat={chat} />
         ))}
@@ -47,24 +62,7 @@ function SearchBar({ searchText, onSearchTextChange }) {
   );
 }
 
-const ChatHistoryItem = ({ chat }) => {
-  const { title, model, dateTime } = chat;
 
-  const handleClick = () => {
-    console.log(`Bringing back chat: ${title}`);
-    // Implement logic to restore the chat here
-  };
 
-  return (
-    <button
-      onClick={handleClick}
-      className="block w-full text-left p-2 rounded-lg hover:bg-gray-400 focus:outline-none"
-    >
-      <div className="font-semibold">{title}</div>
-      <div className="text-sm text-gray-600">{model}</div>
-      <div className="text-xs text-gray-500">{dateTime}</div>
-    </button>
-  );
-};
 
 export default LeftNav;

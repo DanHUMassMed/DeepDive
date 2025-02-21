@@ -1,0 +1,18 @@
+[
+    {
+        "project_id": "deep-dive",
+        "chat_id": "34b25d3f-3802-4092-a4d4-3666cfc287b0",
+        "chat_start_date": "02-20-25 20:43:42",
+        "chat_title": "Chat on 02-20-25 20:43:42",
+        "chat_llm_name": "deep.seekr1:32b",
+        "active_chat": false
+    },
+    {
+        "project_id": "deep-dive",
+        "chat_id": "8f22bf7b-c35e-43fe-a93d-5f18c1735abd",
+        "chat_start_date": "02-21-25 07:36:02",
+        "chat_title": "Chat on 02-21-25 07:36:02",
+        "chat_llm_name": "deep.seekr1:32b",
+        "active_chat": true
+    }
+]

@@ -10,6 +10,7 @@ __pycache__/
 # Jupyter Notebook
 .ipynb_checkpoints
 
+**/checkpoints.db
 freeze.txt
 **/.env
 
@@ -17,3 +18,4 @@ freeze.txt
 **/dist/
 **/build/
 **/node_modules/
+notebooks/data/

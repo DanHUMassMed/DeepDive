@@ -1,10 +1,11 @@
 import { useEffect, useRef, useContext } from 'react';
 import ConfigContext from '../components/ConfigContext';
 
-const useChatEffect = (messageToSend, setChatHistory) => {
+const useChatEffect = (messageToSend, setChatMessage) => {
   const { config, setConfig  } = useContext(ConfigContext);
 
   const websocketRef = useRef(null);
+
   const setIsProcessing = (isProcessing) => {
     setConfig((prevConfig) => ({...prevConfig, isProcessingPrompt: isProcessing}));
   }
@@ -29,7 +30,7 @@ const useChatEffect = (messageToSend, setChatHistory) => {
   useEffect(() => {
     if (messageToSend.trim()) {
       // Initialize WebSocket connection
-      websocketRef.current = new WebSocket("ws://localhost:8000/ws/sendMessage/");
+      websocketRef.current = new WebSocket("ws://localhost:8000/ws/sendMessage?project_id=DeepDive");
 
       websocketRef.current.onopen = () => {
         setIsProcessing(true);
@@ -54,15 +55,15 @@ const useChatEffect = (messageToSend, setChatHistory) => {
           setIsProcessing(false);
         }
 
-        setChatHistory((prev) => {
-          const prevChatHistory = [...prev];
-          const lastMessage = prevChatHistory[prevChatHistory.length - 1];
+        setChatMessage((prev) => {
+          const prevChatMessage = [...prev];
+          const lastMessage = prevChatMessage[prevChatMessage.length - 1];
           if (lastMessage && lastMessage.type === 'ai') {
             lastMessage.content += message;
           } else {
-            prevChatHistory.push({ type: 'ai', content: message });
+            prevChatMessage.push({ type: 'ai', content: message });
           }
-          return prevChatHistory;
+          return prevChatMessage;
         });
       };
     }
@@ -73,7 +74,7 @@ const useChatEffect = (messageToSend, setChatHistory) => {
       
 
     };
-  }, [messageToSend, setChatHistory]);
+  }, [messageToSend, setChatMessage]);
 
   return { closeWebSocket };
 };

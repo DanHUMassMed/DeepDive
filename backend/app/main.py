@@ -1,13 +1,17 @@
 import subprocess
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.websockets import WebSocketState
-from typing import List
+from typing import List, Optional
 from fastapi.middleware.cors import CORSMiddleware
-from langchain.llms import Ollama
+from langchain_ollama import ChatOllama
 from pydantic import BaseModel
+
 import requests
 import asyncio
+from app.app_session import SessionManager
+from app.chat_history_manager import ChatHistoryManager, ChatHistoryItem
 
+# localhost:8000
 app = FastAPI()
 
 # CORS middleware configuration
@@ -19,17 +23,8 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
-
-# Define the Pydantic model for the request body
-class PromptRequest(BaseModel):
-    prompt: str
-
-# Initialize the Ollama LLM
-llm = Ollama(model="deepseek-r1:32b")  # Replace with the actual model name if needed
-
-# Function to send a prompt to the model
-def sendPrompt(prompt: str) -> str:
-    return llm(prompt)
+# Instantiate session manager
+session_manager = SessionManager()
 
 
 class ConnectionManager:
@@ -57,51 +52,45 @@ class ConnectionManager:
     async def send_message(self, websocket: WebSocket, message: str):
         await websocket.send_text(message)
 
-manager = ConnectionManager()
+# TODO: Move connection_manager into the session
+# This is working for now as we only have one session
+connection_manager = ConnectionManager()
 
 
-@app.websocket("/ws/sendMessage/")
-async def websocket_endpoint(websocket: WebSocket):
-    await manager.connect(websocket)
+@app.websocket("/ws/sendMessage")
+async def websocket_endpoint(websocket: WebSocket, project_id: str):
+    print(f"websocket_endpoint {project_id}")
+    await connection_manager.connect(websocket)
 
+    active_session = session_manager.get_session(project_id)
+        
     try:
         # Await message from the client
         prompt = await websocket.receive_text()
         print(f"prompt: {prompt}")
 
         # Launch the streaming task in the background
-        task = asyncio.create_task(stream_llm(websocket, prompt))
+        task = asyncio.create_task(active_session.stream_llm(websocket, prompt))
 
         # Store the task in the manager
-        manager.active_tasks[websocket] = task
+        connection_manager.active_tasks[websocket] = task
 
         # Await the task's completion
         await task
 
     except WebSocketDisconnect:
         print("disconnect websocket")
-        manager.disconnect(websocket)
+        connection_manager.disconnect(websocket)
     except Exception as e:
         print(f"Error: {e}")
-        manager.disconnect(websocket)
+        connection_manager.disconnect(websocket)
         await websocket.close()
 
-# Stream data from LLM in chunks
-async def stream_llm(websocket: WebSocket, prompt: str):
-    try:
-        async for chunk in llm.astream(prompt):
-            await websocket.send_text(chunk)
-            #await asyncio.sleep(0.1)  # Simulating delay for stream chunks
-    except asyncio.CancelledError:
-        print("Streaming task was canceled.")
-    finally:
-        if websocket.client_state == WebSocketState.CONNECTED:
-            await websocket.send_text("[DONE]")
 
 @app.post("/cancel-stream")
 async def cancel_stream():
     # Iterate through active tasks and cancel them
-    for websocket, task in manager.active_tasks.items():
+    for websocket, task in connection_manager.active_tasks.items():
         if task and not task.done():
             print(f"Cancelling task for {websocket.client.host}")
             task.cancel()
@@ -110,7 +99,7 @@ async def cancel_stream():
 
 
 # API endpoint to get the response from the model
-@app.get("/available-models/")
+@app.get("/get/available-models")
 async def available_models():
     url = "http://localhost:11434/api/tags"
     response = requests.get(url)
@@ -130,4 +119,17 @@ def open_ollama():
     except subprocess.CalledProcessError as e:
         print(f"Failed to open Ollama: {e}")
         
-        
+# API endpoint to get the response from the model
+@app.get("/get/chat-history/{project_context}")
+def get_chat_history(project_context: str):
+    print(f"get_chat_history {project_context}")
+    chat_history_manager = ChatHistoryManager.get_chat_history_manager()
+    return chat_history_manager.get_chat_history(project_context)
+
+
+# API endpoint to create a new chat history item
+@app.post("/create/chat-history-item")
+def create_chat_history_item(chat_history_item: ChatHistoryItem):
+    chat_history_manager = ChatHistoryManager.get_chat_history_manager()
+    # Use chat_history_item.project_id to access the 'project_id' field
+    return chat_history_manager.create_chat_history_item(chat_history_item)

@@ -4,6 +4,8 @@ import { CiGlobe } from 'react-icons/ci';
 import { IoBulbOutline, IoArrowUpCircle, IoStop } from 'react-icons/io5';
 
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkHtml from 'remark-html';
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { dark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import useChatEffect from '../hooks/useChatEffect';
@@ -15,11 +17,11 @@ const DialogContainer = () => {
   const { config, setConfig  } = useContext(ConfigContext);
 
   const textareaRef = useRef(null);
-  const [chatHistory, setChatHistory] = useState([]);  
+  const [chatMessage, setChatMessage] = useState([]);  
   const [messageToSend, setMessageToSend] = useState('');
   
   // Use the custom hook
-  const { closeWebSocket } = useChatEffect(messageToSend, setChatHistory);
+  const { closeWebSocket } = useChatEffect(messageToSend, setChatMessage);
   
 
   const handleSendPrompt = (e) => {
@@ -31,7 +33,7 @@ const DialogContainer = () => {
       if (!userMessage.trim() || config.isProcessingPrompt) return;
 
       // Add the user's message to the chat history
-      setChatHistory((prev) => [...prev, { type: 'user', content: userMessage }]);
+      setChatMessage((prev) => [...prev, { type: 'user', content: userMessage }]);
 
       // Send the user's message to the server
       setConfig((prevConfig) => ({...prevConfig, isPromptTextEntered: false}));
@@ -57,7 +59,7 @@ const DialogContainer = () => {
 
   return (
     <div className="w-full h-full p-4 flex flex-col justify-end">
-      <ChatWindow chatHistory={chatHistory} />
+      <ChatWindow chatMessage={chatMessage} />
       <ChatPrompt textareaRef={textareaRef} 
                   handleSendPrompt={handleSendPrompt} 
                   handleStopMessage={handleStopMessage} />
@@ -66,7 +68,7 @@ const DialogContainer = () => {
 };
 
 // ChatWindow Component - Holds all chat interactions (User & AI dialogs)
-const ChatWindow = ({ chatHistory }) => {
+const ChatWindow = ({ chatMessage }) => {
   const chatWindowRef = useRef(null);
 
   useEffect(() => {
@@ -74,14 +76,14 @@ const ChatWindow = ({ chatHistory }) => {
     if (chatWindowRef.current) {
       chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
     }
-  }, [chatHistory]); // Run the effect every time messages change
+  }, [chatMessage]); // Run the effect every time messages change
 
   return (
     <div
       ref={chatWindowRef} 
       className="flex-grow overflow-y-auto p-2 max-h-[calc(100vh-150px)]"
     >
-      {chatHistory.map((interaction, index) => (
+      {chatMessage.map((interaction, index) => (
         <ChatInteraction key={index} interaction={interaction} />
       ))}
     </div>
@@ -127,7 +129,7 @@ const AIDialog = ({ interaction }) => {
         className="rounded-full w-10 h-10"
       />
       <div className="text-sm">
-        <ReactMarkdown components={{
+        <ReactMarkdown remarkPlugins={[remarkGfm, remarkHtml]} components={{
           code({ className, children, ...rest }) {
             const match = /language-(\w+)/.exec(className || "");
             return match ? (
@@ -145,7 +147,8 @@ const AIDialog = ({ interaction }) => {
               </code>
             );
           },
-        }}>{interaction.content}</ReactMarkdown>
+        }}
+>{interaction.content}</ReactMarkdown>
       </div>
     </div>
   );
