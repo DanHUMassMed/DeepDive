@@ -36,7 +36,7 @@ const LeftNav = () => {
       <SearchBar />
       <div className="p-2 max-h-[calc(100vh-64px)] overflow-y-auto">
         {chatHistory.map((chat) => (
-          <ChatHistoryItem key={chat.id} chat={chat} />
+          <ChatHistoryItem key={chat.chat_id} chat={chat} />
         ))}
       </div>
     </div>
