@@ -83,12 +83,11 @@ const TopNav = () => {
 
   const onNewChat = async (e) => {
     const newChat = await createNewChat(config.project_id)
-    setConfig((prevConfig) => ({
-      ...prevConfig,
-      active_chat_id: newChat['chat_id'],
-    }));
-    //alert(newChat['chat_id']);
-
+  
+    localStorage.removeItem('appConfig');
+    localStorage.clear();
+    sessionStorage.clear();
+    alert(newChat['chat_id']);
   };
   
   // useEffect(() => {

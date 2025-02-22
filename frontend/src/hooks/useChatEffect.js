@@ -34,7 +34,7 @@ const useChatEffect = (messageToSend, setChatMessage) => {
 
     if (messageToSend.trim()) {
       // Initialize WebSocket connection
-      websocketRef.current = new WebSocket(`ws://localhost:8000/ws/sendMessage?project_id=${config.project_id}&chat_id=${config.active_chat_id}`);
+      websocketRef.current = new WebSocket(`ws://localhost:8000/ws/sendMessage?project_id=${config.project_id}`);
 
       websocketRef.current.onopen = () => {
         setIsProcessing(true);
@@ -57,22 +57,6 @@ const useChatEffect = (messageToSend, setChatMessage) => {
         if (message.includes('[DONE]')) {
           message = message.replace('[DONE]', '\n');  
           setIsProcessing(false);
-          // Check if active_chat_id is blank
-          // If it is we know that we automatically created a chat
-          // and we need to update the active_chat_id
-          if (config.active_chat_id === '') {
-            getActiveChat(config.project_id)
-              .then(activeChatItem => {
-                //This will trigger a refresh on the chatHistory
-                config.active_chat_id = activeChatItem['chat_id']
-                console.log(activeChatItem);
-              })
-              .catch(error => {
-                // Handle any errors that occur during the fetch
-                console.error('Error fetching active chat:', error);
-              });
-          }
-
         }
 
         setChatMessage((prev) => {

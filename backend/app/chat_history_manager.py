@@ -31,7 +31,7 @@ class ChatHistoryManager:
     
     def __init__(self):
         if ChatHistoryManager._instance is not None:
-            raise Exception("This class is a singleton! Use get_chat_history_manager() to get the instance.")
+            raise Exception("This class is a singleton! Use singleton() to get the instance.")
         self.chat_history_data = self._load_chat_history()
 
     @classmethod
@@ -43,7 +43,7 @@ class ChatHistoryManager:
     def _load_chat_history(self):
         """Load chat history from the JSON file or return an empty list if the file doesn't exist."""
         if os.path.exists(self._file_name):
-            with open(self._file_name, 'r') as file:
+            with open(self._file_name, 'r', encoding="utf-8") as file:
                 try:
                     return json.load(file)
                 except json.JSONDecodeError:
@@ -60,7 +60,7 @@ class ChatHistoryManager:
             os.makedirs(directory)
 
         # Write the data to the file
-        with open(self._file_name, 'w') as file:
+        with open(self._file_name, 'w', encoding="utf-8") as file:
             json.dump(self.chat_history_data, file, indent=4)
 
     def get_chat_history(self, project_id):

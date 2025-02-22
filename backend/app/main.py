@@ -55,14 +55,10 @@ connection_manager = ConnectionManager()
 
 @app.websocket("/ws/sendMessage")
 async def websocket_endpoint(websocket: WebSocket, project_id: str, chat_id: str):
-    print(f"websocket_endpoint project_id={project_id} chat_id={chat_id}")
+    print(f"websocket_endpoint project_id={project_id}")
     await connection_manager.connect(websocket)
 
     active_session = session_manager.get_session(project_id)
-    if chat_id == '':
-        print(f"calling create_chat_history_item")
-        chat_history_item = ChatHistoryManager.singleton().create_chat_history_item(project_id)
-        print(f"called create_chat_history_item {chat_history_item}")
         
     try:
         # Await message from the client

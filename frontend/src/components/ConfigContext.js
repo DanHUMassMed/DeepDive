@@ -14,10 +14,9 @@ export const useConfig = () => {
 
 // Default configuration values
 const defaultConfig = {
-  apiUrl: 'http://127.0.0.1:8000/',
   theme: 'dark',
   project_id: 'deep-dive',
-  active_chat_id:'',
+  chat_history_timestamp: '',
   isLeftNavOpen: true,
   isRightNavOpen: false,
   isPromptTextEntered: false,

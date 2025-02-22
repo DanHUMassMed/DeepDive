@@ -24,7 +24,7 @@ const LeftNav = () => {
     if (config.project_id) {
       fetchChatHistory();
     }
-  }, [config.active_chat_id])
+  }, [config.chat_history_timestamp])
 
   return (
     <div
