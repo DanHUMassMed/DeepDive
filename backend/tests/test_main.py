@@ -2,15 +2,15 @@ import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch
 
-from app.main import app, sendPrompt   # Assuming your file is named 'main.py'
+from app.main import app,get_chat_history   # Assuming your file is named 'main.py'
 
 client = TestClient(app)
 
 # Test case for POST /chat/ endpoint
-@patch("app.main.sendPrompt")
-def test_chat(mock_sendPrompt):
+@patch("app.main.get_chat_history")
+def test_chat(mock_get_chat_history):
     # Mock the response of sendPrompt
-    mock_sendPrompt.return_value = "This is a test response."
+    mock_get_chat_history.return_value = "This is a test response."
 
     # Send a test request
     response = client.post("/chat/", json={"prompt": "Test prompt"})
@@ -22,7 +22,7 @@ def test_chat(mock_sendPrompt):
     assert response.json() == {"response": "This is a test response."}
 
     # Ensure that sendPrompt was called with the correct argument
-    mock_sendPrompt.assert_called_once_with("Test prompt")
+    mock_get_chat_history.assert_called_once_with("Test prompt")
 
 
 # Test case for GET /available-models/ endpoint

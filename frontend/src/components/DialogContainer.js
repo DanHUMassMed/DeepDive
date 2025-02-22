@@ -17,11 +17,11 @@ const DialogContainer = () => {
   const { config, setConfig  } = useContext(ConfigContext);
 
   const textareaRef = useRef(null);
-  const [chatMessage, setChatMessage] = useState([]);  
+  const [chatMessages, setChatMessages] = useState([]);  
   const [messageToSend, setMessageToSend] = useState('');
   
   // Use the custom hook
-  const { closeWebSocket } = useChatEffect(messageToSend, setChatMessage);
+  const { closeWebSocket } = useChatEffect(messageToSend, setChatMessages);
   
 
   const handleSendPrompt = (e) => {
@@ -33,7 +33,7 @@ const DialogContainer = () => {
       if (!userMessage.trim() || config.isProcessingPrompt) return;
 
       // Add the user's message to the chat history
-      setChatMessage((prev) => [...prev, { type: 'user', content: userMessage }]);
+      setChatMessages((prev) => [...prev, { type: 'user', content: userMessage }]);
 
       // Send the user's message to the server
       setConfig((prevConfig) => ({...prevConfig, isPromptTextEntered: false}));
@@ -59,7 +59,7 @@ const DialogContainer = () => {
 
   return (
     <div className="w-full h-full p-4 flex flex-col justify-end">
-      <ChatWindow chatMessage={chatMessage} />
+      <ChatWindow chatMessage={chatMessages} />
       <ChatPrompt textareaRef={textareaRef} 
                   handleSendPrompt={handleSendPrompt} 
                   handleStopMessage={handleStopMessage} />

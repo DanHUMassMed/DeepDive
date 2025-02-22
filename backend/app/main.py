@@ -1,15 +1,11 @@
+import asyncio
 import subprocess
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
-from fastapi.websockets import WebSocketState
-from typing import List, Optional
-from fastapi.middleware.cors import CORSMiddleware
-from langchain_ollama import ChatOllama
-from pydantic import BaseModel
 
 import requests
-import asyncio
 from app.app_session import SessionManager
-from app.chat_history_manager import ChatHistoryManager, ChatHistoryItem
+from app.chat_history_manager import ChatHistoryItem, ChatHistoryManager
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
 
 # localhost:8000
 app = FastAPI()
@@ -58,11 +54,15 @@ connection_manager = ConnectionManager()
 
 
 @app.websocket("/ws/sendMessage")
-async def websocket_endpoint(websocket: WebSocket, project_id: str):
-    print(f"websocket_endpoint {project_id}")
+async def websocket_endpoint(websocket: WebSocket, project_id: str, chat_id: str):
+    print(f"websocket_endpoint project_id={project_id} chat_id={chat_id}")
     await connection_manager.connect(websocket)
 
     active_session = session_manager.get_session(project_id)
+    if chat_id == '':
+        print(f"calling create_chat_history_item")
+        chat_history_item = ChatHistoryManager.singleton().create_chat_history_item(project_id)
+        print(f"called create_chat_history_item {chat_history_item}")
         
     try:
         # Await message from the client
@@ -119,17 +119,25 @@ def open_ollama():
     except subprocess.CalledProcessError as e:
         print(f"Failed to open Ollama: {e}")
         
-# API endpoint to get the response from the model
+# API endpoint to get the chat history
 @app.get("/get/chat-history/{project_context}")
 def get_chat_history(project_context: str):
-    print(f"get_chat_history {project_context}")
-    chat_history_manager = ChatHistoryManager.get_chat_history_manager()
+    print(f"calling get_chat_history {project_context}")
+    chat_history_manager = ChatHistoryManager.singleton()
     return chat_history_manager.get_chat_history(project_context)
 
+# API endpoint to get the active chat
+@app.get("/get/active-chat/{project_context}")
+def get_active_chat(project_context: str):
+    print(f"calling get_active_chat {project_context}")
+    chat_history_manager = ChatHistoryManager.singleton()
+    return chat_history_manager.get_active_chat(project_context)
 
-# API endpoint to create a new chat history item
-@app.post("/create/chat-history-item")
+# API endpoint to create a new chat item
+@app.post("/create/chat-item")
 def create_chat_history_item(chat_history_item: ChatHistoryItem):
-    chat_history_manager = ChatHistoryManager.get_chat_history_manager()
-    # Use chat_history_item.project_id to access the 'project_id' field
-    return chat_history_manager.create_chat_history_item(chat_history_item)
+    print(f"calling get_session {chat_history_item.project_id}")
+    active_session = session_manager.get_session(chat_history_item.project_id)
+    print(f"calling create_new_chat {chat_history_item}")
+    new_chat = active_session.create_new_chat(chat_history_item)
+    return new_chat

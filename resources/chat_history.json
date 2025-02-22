@@ -1,0 +1,26 @@
+[
+    {
+        "project_id": "project1",
+        "chat_id": "chat1",
+        "chat_start_date": "2023-01-01 12:00 PM",
+        "chat_title": "First Chat",
+        "chat_llm_name": "model1",
+        "active_chat": false
+    },
+    {
+        "project_id": "project1",
+        "chat_id": "chat2",
+        "chat_start_date": "2023-01-02 01:00 PM",
+        "chat_title": "Second Chat",
+        "chat_llm_name": "model2",
+        "active_chat": true
+    },
+    {
+        "project_id": "project2",
+        "chat_id": "chat12",
+        "chat_start_date": "2023-01-02 01:00 PM",
+        "chat_title": "Second Chat p2",
+        "chat_llm_name": "model2",
+        "active_chat": true
+    }
+]

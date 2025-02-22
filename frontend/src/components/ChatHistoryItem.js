@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 const ChatHistoryItem = ({ chat }) => {
-  const { chat_title, chat_llm_name, caht_start_date, active_chat } = chat;
+  const { chat_title, chat_llm_name, chat_start_date, active_chat } = chat;
   const [showMenu, setShowMenu] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState(null); // Holds the type of modal (rename, share, delete)
@@ -84,7 +84,7 @@ const ChatHistoryItem = ({ chat }) => {
       >
         <div className="font-semibold">{chat_title}</div>
         <div className="text-sm text-gray-600">{chat_llm_name}</div>
-        <div className="text-xs text-gray-500">{caht_start_date}</div>
+        <div className="text-xs text-gray-500">{chat_start_date}</div>
       </button>
 
       {/* Ellipsis Button (Visible on Hover) */}

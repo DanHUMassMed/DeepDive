@@ -1,18 +1,18 @@
 [
     {
         "project_id": "deep-dive",
-        "chat_id": "34b25d3f-3802-4092-a4d4-3666cfc287b0",
-        "chat_start_date": "02-20-25 20:43:42",
-        "chat_title": "Chat on 02-20-25 20:43:42",
+        "chat_id": "77ad3fa2-341c-4de8-bc8a-c2aac5ba9f05",
+        "chat_start_date": "2025-02-21 07:02:11 PM",
+        "chat_title": "Chat on 2025-02-21 07:02:11 PM",
         "chat_llm_name": "deep.seekr1:32b",
-        "active_chat": false
+        "active_chat": true
     },
     {
         "project_id": "deep-dive",
-        "chat_id": "8f22bf7b-c35e-43fe-a93d-5f18c1735abd",
-        "chat_start_date": "02-21-25 07:36:02",
-        "chat_title": "Chat on 02-21-25 07:36:02",
+        "chat_id": "ea9123ff-9a8e-46c0-a53f-22b8f88e3202",
+        "chat_start_date": "2025-02-21 07:00:51 PM",
+        "chat_title": "Chat on 2025-02-21 07:00:51 PM",
         "chat_llm_name": "deep.seekr1:32b",
-        "active_chat": true
+        "active_chat": false
     }
 ]

@@ -13,7 +13,6 @@ const LeftNav = () => {
       try {
         const chatHistoryServer = await getChatHistory(config.project_id);
         setChatHistory(chatHistoryServer);
-        // You can uncomment these if you need them
         // alert(chatHistoryServer.length);
         //alert("Left Nav");
         // alert(JSON.stringify(chatHistoryServer, null, 2));

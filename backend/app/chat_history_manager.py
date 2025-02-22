@@ -1,11 +1,19 @@
 import json
 import os
 import uuid
-from datetime import datetime
-from pydantic.dataclasses import dataclass
-from typing import Optional
 from dataclasses import asdict
+from datetime import datetime
+from typing import Optional
+import logging
 
+from pydantic.dataclasses import dataclass
+# Configure the logger
+logging.basicConfig(
+    filename='debug.log',        # Log file name
+    filemode='a',              # Append mode; use 'w' to overwrite
+    format='%(asctime)s %(levelname)s: %(message)s',
+    level=logging.DEBUG       # Set the logging level
+)
 
 @dataclass
 class ChatHistoryItem:
@@ -23,11 +31,11 @@ class ChatHistoryManager:
     
     def __init__(self):
         if ChatHistoryManager._instance is not None:
-            raise Exception("This class is a singleton! Use getChatHistoryManager() to get the instance.")
+            raise Exception("This class is a singleton! Use get_chat_history_manager() to get the instance.")
         self.chat_history_data = self._load_chat_history()
 
     @classmethod
-    def get_chat_history_manager(cls):
+    def singleton(cls):
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
@@ -82,7 +90,8 @@ class ChatHistoryManager:
 
         # Set the current date and time if not provided
         if not chat_history_item.chat_start_date:
-            chat_history_item.chat_start_date = datetime.now().strftime('%m-%d-%y %H:%M:%S')
+            #chat_history_item.chat_start_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            chat_history_item.chat_start_date = datetime.now().strftime('%Y-%m-%d %I:%M:%S %p')
 
         # Set the chat_title if not provided or blank
         if not chat_history_item.chat_title:
@@ -99,7 +108,7 @@ class ChatHistoryManager:
         self._set_active_chat_for_user(chat_history_item.project_id, chat_history_item.chat_id)
 
         # Add the new chat history item to the data
-        self.chat_history_data.append(asdict(chat_history_item))
+        self.chat_history_data.insert(0, asdict(chat_history_item))
 
         # Save the updated chat history data to disk
         self._save_chat_history()
@@ -115,7 +124,8 @@ class ChatHistoryManager:
                 self.chat_history_data[idx] = existing_item
                 self._save_chat_history()
                 return
-        # No changes if item is not found
+            else:
+                raise Exception(f"Chat ID {chat_id} not found.")
         
     
     def update_chat_history_item_model_name(self, chat_id, chat_llm_name):
@@ -126,7 +136,9 @@ class ChatHistoryManager:
                 self.chat_history_data[idx] = existing_item
                 self._save_chat_history()
                 return
-        # No changes if item is not found
+            else:
+                raise Exception(f"Chat ID {chat_id} not found.")
+        
         
 
     def delete_chat_history_item(self, chat_id):
@@ -136,7 +148,7 @@ class ChatHistoryManager:
                 project_id = existing_item['project_id']
                 del self.chat_history_data[idx]
                 self._save_chat_history()
-                return self.getChatHistory(project_id)
+                return self.get_chat_history(project_id)
         return []  # Item not found
 
     def get_active_chat(self, project_id):

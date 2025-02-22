@@ -3,5 +3,8 @@
         "backend"
     ],
     "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
+    "python.testing.pytestEnabled": true,
+    "terminal.integrated.env.osx": {
+        "PYTHONPATH": "/Users/dan/Code/LLM/DeepDive/backend"
+    }
 }
