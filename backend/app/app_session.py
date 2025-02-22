@@ -9,6 +9,11 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 from langgraph.graph import START, MessagesState, StateGraph
+from app.utils.utilities import setup_logging
+import logging
+
+setup_logging()
+logger = logging.getLogger(__name__)
 
 def get_parent_directory():
     directory = os.path.dirname(__file__)

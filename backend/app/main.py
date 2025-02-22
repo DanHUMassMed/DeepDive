@@ -1,11 +1,16 @@
 import asyncio
-import subprocess
+import logging
+import os
 
 import requests
 from app.app_session import SessionManager
 from app.chat_history_manager import ChatHistoryItem, ChatHistoryManager
+from app.utils.utilities import open_ollama, setup_logging
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+
+setup_logging()
+logger = logging.getLogger(__name__)
 
 # localhost:8000
 app = FastAPI()
@@ -21,7 +26,6 @@ app.add_middleware(
 
 # Instantiate session manager
 session_manager = SessionManager()
-
 
 class ConnectionManager:
     def __init__(self):
@@ -54,7 +58,7 @@ connection_manager = ConnectionManager()
 
 
 @app.websocket("/ws/sendMessage")
-async def websocket_endpoint(websocket: WebSocket, project_id: str, chat_id: str):
+async def websocket_endpoint(websocket: WebSocket, project_id: str):
     print(f"websocket_endpoint project_id={project_id}")
     await connection_manager.connect(websocket)
 
@@ -105,15 +109,6 @@ async def available_models():
         return model_names
     else:
         raise HTTPException(status_code=response.status_code, detail="Failed to fetch models")
-
-
-def open_ollama():
-    try:
-        # Open Ollama (assuming it's a GUI app located in /Applications)
-        subprocess.run(["open", "-a", "Ollama"], check=True)
-        print("Ollama opened successfully.")
-    except subprocess.CalledProcessError as e:
-        print(f"Failed to open Ollama: {e}")
         
 # API endpoint to get the chat history
 @app.get("/get/chat-history/{project_context}")
@@ -127,7 +122,9 @@ def get_chat_history(project_context: str):
 def get_active_chat(project_context: str):
     print(f"calling get_active_chat {project_context}")
     chat_history_manager = ChatHistoryManager.singleton()
-    return chat_history_manager.get_active_chat(project_context)
+    active_chat = chat_history_manager.get_active_chat(project_context)
+    logger.debug(f"active_chat {active_chat}")
+    return active_chat
 
 # API endpoint to create a new chat item
 @app.post("/create/chat-item")
