@@ -19,7 +19,7 @@ logging.basicConfig(
 class ProjectState:
     project_id: Optional[str] = None
     project_name: Optional[str] = None
-    chat_history_timestamp: Optional[str] = ''  
+    chat_history_timestamp: Optional[str] = ''
     project_start_date: Optional[str] = None
     
 
@@ -118,7 +118,7 @@ class ProjectStateManager:
             else:
                 raise Exception(f"Project Id {project_id} not found.")
             
-    def update_project_state_chat_history_timestamp(self, project_id):
+    def update_chat_history_timestamp(self, project_id):
         """Update an existing project state item if found, and save the updated list to disk."""
         # Get the current timestamp with milliseconds
         chat_history_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.") + f"{datetime.now().microsecond // 1000:03d}"

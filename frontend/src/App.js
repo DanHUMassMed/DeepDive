@@ -4,7 +4,6 @@ import TopNav from './components/TopNav';
 import LeftNav from './components/LeftNav';
 import RightNav from './components/RightNav';
 import DialogContainer from './components/DialogContainer';
-import { getChatHistory } from './api/chatAPI';
 import { ConfigProvider, useConfig } from './components/ConfigContext';
 
 

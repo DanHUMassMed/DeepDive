@@ -5,6 +5,10 @@ from dataclasses import asdict
 from datetime import datetime
 from typing import Optional
 import logging
+from app.utils.utilities import open_ollama, setup_logging
+
+setup_logging()
+logger = logging.getLogger(__name__)
 
 from pydantic.dataclasses import dataclass
 # Configure the logger
@@ -118,14 +122,18 @@ class ChatHistoryManager:
         
     def update_chat_history_item_title(self, chat_id, chat_title):
         """Update an existing chat history item if found, and save the updated list to disk."""
+        logger.debug(f"ENTERING update_chat_history_item_title with={chat_id} and title={chat_title}")
         for idx, existing_item in enumerate(self.chat_history_data):
+            logger.debug(f"IN 1")
             if existing_item['chat_id'] == chat_id:
+                logger.debug(f"IN 2")
                 existing_item['chat_title'] = chat_title
                 self.chat_history_data[idx] = existing_item
                 self._save_chat_history()
-                return
-            else:
-                raise Exception(f"Chat ID {chat_id} not found.")
+                return existing_item
+            
+        logger.debug(f"EXITING Exception")
+        raise Exception(f"Chat ID {chat_id} not found.")
         
     
     def update_chat_history_item_model_name(self, chat_id, chat_llm_name):
@@ -143,13 +151,13 @@ class ChatHistoryManager:
 
     def delete_chat_history_item(self, chat_id):
         """Delete a specific chat history item by chat_id and return the remaining items for the user."""
+        #TODO If chat item is the active item select an alternative as active
         for idx, existing_item in enumerate(self.chat_history_data):
             if existing_item['chat_id'] == chat_id:
-                project_id = existing_item['project_id']
                 del self.chat_history_data[idx]
                 self._save_chat_history()
-                return self.get_chat_history(project_id)
-        return []  # Item not found
+                return {'status':'SUCCESS'}
+        return {'status':'FAIL'}
 
     def get_active_chat(self, project_id):
         """Return the active chat history item for the given project_id."""

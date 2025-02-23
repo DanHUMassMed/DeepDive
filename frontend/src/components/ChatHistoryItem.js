@@ -1,11 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
+import { MdOutlineDriveFileRenameOutline } from "react-icons/md";
+import { FiShare } from "react-icons/fi";
+import { RiDeleteBinLine } from "react-icons/ri";
+import { Tooltip } from 'react-tooltip';
+import { renameChat, getChatHistoryTimestamp, deleteChatHistoryItem } from "../api/chatAPI"
+import ConfigContext from './ConfigContext';
+
 
 const ChatHistoryItem = ({ chat }) => {
-  const { chat_title, chat_llm_name, chat_start_date, active_chat } = chat;
+  const { config, setConfig  } = useContext(ConfigContext);
+  const { chat_id, chat_title, chat_llm_name, chat_start_date, active_chat } = chat;
   const [showMenu, setShowMenu] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState(null); // Holds the type of modal (rename, share, delete)
-  const [newName, setNewName] = useState(''); // For the new name input in Rename
+  const [newName, setNewName] = useState(chat_title); // For the new name input in Rename
   const [confirmation, setConfirmation] = useState(false); // For delete confirmation
   const [shareLink, setShareLink] = useState(''); // For Share Link (will be implemented later)
   const menuRef = useRef(null);
@@ -49,22 +57,55 @@ const ChatHistoryItem = ({ chat }) => {
   // Handle actions for the modal
   const handleModalClose = () => {
     setShowModal(false);
-    setNewName(''); // Reset input fields
     setConfirmation(false);
-    setShareLink('');
+    setNewName(chat_title)
   };
 
   const handleRename = () => {
     console.log(`Renaming chat to: ${newName}`);
-    // Handle rename logic here
-    handleModalClose();
+    renameChat(chat_id, newName)
+      .then((chatItem) => {
+        // Handle the updated chat item here
+        console.log('Updated chat item:', chatItem);
+        return getChatHistoryTimestamp(config.project_id); // Return the promise from getChatHistoryTimestamp
+      })
+      .then((chatHistoryTimestamp) => {
+        // Handle the result of getChatHistoryTimestamp
+        setConfig((prevConfig) => ({
+          ...prevConfig,
+          chat_history_timestamp: chatHistoryTimestamp,
+        }));
+        handleModalClose();
+      })
+      .catch((error) => {
+        // Handle any errors that occurred during the rename operation
+        console.error('Error renaming chat:', error);
+        // Optionally, handle the error (e.g., show a notification to the user)
+      });
   };
 
   const handleDelete = () => {
-    if (confirmation) {
-      console.log(`Deleting chat: ${chat_title}`);
-      // Handle delete logic here
-    }
+    console.log(`Deleting chat: ${chat_title}`);
+    deleteChatHistoryItem(chat_id)
+    .then((returnStatus) => {
+      // Handle the updated chat item here
+      //TODO manage returnStatus {'status':'FAIL'}
+      return getChatHistoryTimestamp(config.project_id); // Return the promise from getChatHistoryTimestamp
+    })
+    .then((chatHistoryTimestamp) => {
+      // Handle the result of getChatHistoryTimestamp
+      setConfig((prevConfig) => ({
+        ...prevConfig,
+        chat_history_timestamp: chatHistoryTimestamp,
+      }));
+      handleModalClose();
+    })
+    .catch((error) => {
+      // Handle any errors that occurred during the rename operation
+      console.error('Error renaming chat:', error);
+      // Optionally, handle the error (e.g., show a notification to the user)
+    });
+
     handleModalClose();
   };
 
@@ -92,37 +133,44 @@ const ChatHistoryItem = ({ chat }) => {
         className="absolute top-2 right-2 p-1 text-gray-500 cursor-pointer opacity-0 group-hover:opacity-100"
         onClick={handleEllipsisClick}  // Click to toggle the menu
       >
-        <span>...</span>
-
+        <span data-tooltip-id="optionsTooltip">...</span>
+        <Tooltip
+        id="optionsTooltip"
+        place="top"
+        type="dark"
+        effect="solid"
+      >
+        Options
+      </Tooltip>
         {showMenu && (
           <div
-            ref={menuRef} // Attach the ref to the menu
-            className="fixed bg-white shadow-lg rounded-lg w-32"
-            style={{ 
-              zIndex: 1000,  // Ensure this menu is above other elements
-            }}
-          >
-            <ul className="py-1">
-              <li
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                onClick={() => handleMenuClick('rename')}
-              >
-                Rename
-              </li>
-              <li
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                onClick={() => handleMenuClick('share')}
-              >
-                Share
-              </li>
-              <li
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                onClick={() => handleMenuClick('delete')}
-              >
-                Delete
-              </li>
-            </ul>
-          </div>
+          ref={menuRef} // Attach the ref to the menu
+          className="fixed bg-white shadow-lg rounded-lg w-32"
+          style={{ 
+            zIndex: 1000,  // Ensure this menu is above other elements
+          }}
+        >
+          <ul className="py-1">
+            <li
+              className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center"
+              onClick={() => handleMenuClick('rename')}
+            >
+              <MdOutlineDriveFileRenameOutline className="mr-2" /> Rename
+            </li>
+            <li
+              className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center"
+              onClick={() => handleMenuClick('share')}
+            >
+              <FiShare className="mr-2" /> Share
+            </li>
+            <li
+              className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center text-red-500"
+              onClick={() => handleMenuClick('delete')}
+            >
+              <RiDeleteBinLine className="mr-2" /> Delete
+            </li>
+          </ul>
+        </div>
         )}
       </div>
 
@@ -141,7 +189,7 @@ const ChatHistoryItem = ({ chat }) => {
               <>
                 <input
                   type="text"
-                  value={chat_title}
+                  value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   className="border p-2 mb-4 w-full"
                   placeholder="Enter new name"
@@ -161,15 +209,11 @@ const ChatHistoryItem = ({ chat }) => {
                 <p className="text-gray-600 mb-4">Are you sure you want to delete the chat "{chat_title}"?</p>
                 <div className="flex justify-between">
                   <button
-                    onClick={handleDelete}
-                    className="bg-red-500 text-white p-2 rounded-lg"
-                  >
+                    onClick={handleDelete} className="bg-red-500 text-white p-2 rounded-lg w-full">
                     Yes
                   </button>
                   <button
-                    onClick={handleModalClose}
-                    className="bg-gray-500 text-white p-2 rounded-lg"
-                  >
+                    onClick={handleModalClose} className="bg-gray-500 text-white p-2 rounded-lg  w-full">
                     Cancel
                   </button>
                 </div>

@@ -9,7 +9,7 @@ import remarkHtml from 'remark-html';
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { dark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import useChatEffect from '../hooks/useChatEffect';
-import axios from 'axios';
+import { cancelActiveChat } from '../api/chatAPI';
 
 
 // DialogContainer Component - Main container for the chat UI
@@ -46,14 +46,7 @@ const DialogContainer = () => {
   const handleStopMessage = (e) => {
     e.preventDefault();
     if (config.isProcessingPrompt) {
-      try {
-        // Call the FastAPI cancel endpoint when [STOP] message is detected
-        const response = axios.post('http://localhost:8000/cancel-stream');
-        console.log('Cancel stream response:', response.data);
-        closeWebSocket();
-      } catch (error) {
-        console.error('Error cancelling the stream:', error);
-      }
+      cancelActiveChat(closeWebSocket)
     }
   };
 

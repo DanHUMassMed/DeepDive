@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Optional
 import logging
 
-from app.app_session import UserSession
+from app.session_manager import UserSession
 
 from pydantic.dataclasses import dataclass
 # Configure the logger

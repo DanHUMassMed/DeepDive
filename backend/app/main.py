@@ -1,13 +1,15 @@
 import asyncio
-import logging
 import os
 
 import requests
-from app.app_session import SessionManager
+from app.session_manager import SessionManager
 from app.chat_history_manager import ChatHistoryItem, ChatHistoryManager
-from app.utils.utilities import open_ollama, setup_logging
+from app.project_state_manager import ProjectStateManager, ProjectState
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import logging
+from app.utils.utilities import open_ollama, setup_logging
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -126,11 +128,45 @@ def get_active_chat(project_context: str):
     logger.debug(f"active_chat {active_chat}")
     return active_chat
 
-# API endpoint to create a new chat item
-@app.post("/create/chat-item")
+@app.get("/get/chat-history-timestamp/{project_context}")
+def get_chat_history_timestamp(project_context: str):
+    logger.debug(f"get_chat_history_timestamp with={project_context}")
+    project_state_manager = ProjectStateManager.singleton()
+    chat_history_timestamp = project_state_manager.update_chat_history_timestamp(project_context)
+    logger.debug(f"chat_history_timestamp {chat_history_timestamp}")
+    return chat_history_timestamp
+
+@app.delete("/delete/chat-history-item/{chat_id}")
+async def delete_chat_history_item(chat_id: str):
+    logger.debug(f"ENTERING delete_chat_history with={chat_id}")
+    chat_history_manager = ChatHistoryManager.singleton()
+    updated_history = chat_history_manager.delete_chat_history_item(chat_id)
+    if updated_history is None:
+        logger.debug(f"EXITING delete_chat_history: Item not found")
+        raise HTTPException(status_code=404, detail="Chat history item not found")
+    logger.debug(f"EXITING delete_chat_history")
+    return updated_history
+
+@app.post("/create/chat-history-item")
 def create_chat_history_item(chat_history_item: ChatHistoryItem):
     print(f"calling get_session {chat_history_item.project_id}")
     active_session = session_manager.get_session(chat_history_item.project_id)
     print(f"calling create_new_chat {chat_history_item}")
     new_chat = active_session.create_new_chat(chat_history_item)
     return new_chat
+
+class ChatTitleUpdate(BaseModel):
+    name: str  # This is the field sent in the request body
+
+@app.put("/update/chat-history-item-title/{chat_id}")
+async def update_chat_history_item_title(chat_id: str, chat_title: ChatTitleUpdate):
+    logger.debug(f"ENTERING update_chat_history_item_title with={chat_id} and title={chat_title.name}")
+    chat_history_manager = ChatHistoryManager.singleton()
+    logger.debug(f"IN update_chat_history_item_title")
+    updated_history = chat_history_manager.update_chat_history_item_title(chat_id, chat_title.name)
+    logger.debug(f"IN update_chat_history_item_title with={updated_history}")
+    if updated_history is None:
+        logger.debug(f"EXITING update_chat_history_item_title: Item not found")
+        raise HTTPException(status_code=404, detail="Chat history item not found")
+    logger.debug(f"EXITING update_chat_history_item_title")
+    return updated_history

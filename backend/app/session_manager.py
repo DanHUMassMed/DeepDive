@@ -14,6 +14,7 @@ import logging
 
 setup_logging()
 logger = logging.getLogger(__name__)
+print(f"logger {__name__}")
 
 def get_parent_directory():
     directory = os.path.dirname(__file__)
@@ -88,9 +89,9 @@ class UserSession:
         return graph
 
     def create_new_chat(self, chat_history_item: ChatHistoryItem):
-        print(f"IN create_new_chat {self.project_id}")
+        logger.debug(f"ENTERING create_new_chat with={self.project_id}")
         active_chat = self.chat_history_manager.get_active_chat(self.project_id)
-        print(f"active_chat == {active_chat}")
+        logger.debug(f"active_chat == {active_chat}")
         if active_chat is not None:
             number_of_messages_in_current_chat = self.get_chat_interactions_count(active_chat['chat_id'])
             if number_of_messages_in_current_chat == 0:
@@ -110,21 +111,18 @@ class UserSession:
     
 
     def get_chat_interactions_count(self, chat_id):
-        print("IN get_chat_interactions_count")
+        logger.debug(f"ENTERING get_chat_interactions_count with={chat_id}")
         interactions_count = 0
         with SqliteSaver.from_conn_string(self._db_path) as checkpointer:            
             config = {"configurable": {"thread_id": chat_id}}
-            print("before compiled_graph")
             compiled_graph = self.graph.compile(checkpointer=checkpointer)
-            print("after compiled_graph")
             state_history = compiled_graph.get_state_history(config) 
-            print("after state_history")
             last_interaction = next(state_history, None)
-            print("after last_interaction")
             if last_interaction:
                 values = last_interaction.values  
                 if 'messages' in values:
                     interactions_count = len(values['messages'])
+        logger.debug(f"EXITING get_chat_interactions_count with={interactions_count}")
         return interactions_count
             
 

@@ -63,8 +63,8 @@ def test_update_project_state_name(project_state_manager):
     logging.debug(f"results {result}")
     assert result['project_name'] == 'Updated Project Name'
 
-def test_update_project_state_chat_history_timestamp(project_state_manager):
-    chat_history_timestamp = project_state_manager.update_project_state_chat_history_timestamp('projectid1')
+def test_update_chat_history_timestamp(project_state_manager):
+    chat_history_timestamp = project_state_manager.update_chat_history_timestamp('projectid1')
     result = project_state_manager.get_project_state('projectid1') 
     logging.debug(f"results {result}")
     assert result['chat_history_timestamp'] == chat_history_timestamp

@@ -1,17 +1,33 @@
 [
     {
         "project_id": "deep-dive",
-        "chat_id": "c280103e-c807-48fb-986a-c302b43e1bea",
-        "chat_start_date": "2025-02-22 07:53:49 AM",
-        "chat_title": "Chat on 2025-02-22 07:53:49 AM",
+        "chat_id": "c65e4746-6f56-4806-9bb0-badc095c9fd0",
+        "chat_start_date": "2025-02-22 03:09:12 PM",
+        "chat_title": "Chat on 2025-02-22 03:09:12 PM",
         "chat_llm_name": "deep.seekr1:32b",
         "active_chat": true
     },
     {
         "project_id": "deep-dive",
-        "chat_id": "ea9123ff-9a8e-46c0-a53f-22b8f88e3202",
-        "chat_start_date": "2025-02-21 07:00:51 PM",
-        "chat_title": "Chat on 2025-02-21 07:00:51 PM",
+        "chat_id": "f907ba3a-9de9-4e45-8342-308689290f75",
+        "chat_start_date": "2025-02-22 02:54:50 PM",
+        "chat_title": "Chat on 2025-02-22 02:54:50 PM",
+        "chat_llm_name": "deep.seekr1:32b",
+        "active_chat": false
+    },
+    {
+        "project_id": "deep-dive",
+        "chat_id": "14a3d070-ae8d-410c-81cd-48ced0ddb183",
+        "chat_start_date": "2025-02-22 02:03:48 PM",
+        "chat_title": "Chat on 2025-02-22 02:03:48 PM",
+        "chat_llm_name": "deep.seekr1:32b",
+        "active_chat": false
+    },
+    {
+        "project_id": "deep-dive",
+        "chat_id": "c280103e-c807-48fb-986a-c302b43e1bea",
+        "chat_start_date": "2025-02-22 07:53:49 AM",
+        "chat_title": "Chat on 2025-02-22 07:53:49 AM",
         "chat_llm_name": "deep.seekr1:32b",
         "active_chat": false
     }
