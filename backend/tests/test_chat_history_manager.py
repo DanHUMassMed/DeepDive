@@ -4,19 +4,20 @@ import os
 from datetime import datetime
 from unittest.mock import patch, mock_open
 from app.chat_history_manager import ChatHistoryManager, ChatHistoryItem
-import logging
+from app.utils.utilities import setup_logging
+import copy
+import inspect
+import time
 
-# Configure the logger
-logging.basicConfig(
-    filename='debug.log',        # Log file name
-    filemode='a',              # Append mode; use 'w' to overwrite
-    format='%(asctime)s %(levelname)s: %(message)s',
-    level=logging.DEBUG       # Set the logging level
-)
+def get_current_method_name():
+    return inspect.currentframe().f_code.co_name
+
+logger = setup_logging(logger_nm="test")
+
 
 
 def mock_data():
-    return [
+    data = [
         {
             "project_id": "my-second-project",
             "project_name": "my-second-project",
@@ -39,7 +40,7 @@ def mock_data():
             "chat_history_items": [
                 {
                     "project_id": "deep-dive",
-                    "chat_id": "893c5dc2-9ca8-4a5d-9562-f2ae4abc41b6",
+                    "chat_id": "chat_id_1",
                     "chat_start_date": "2025-02-24 07:59:38 AM",
                     "chat_title": "Chat on 2025-02-24 07:59:38 AM",
                     "chat_llm_name": "deep.seekr1:32b",
@@ -47,7 +48,7 @@ def mock_data():
                 },
                 {
                     "project_id": "deep-dive",
-                    "chat_id": "4edea6c2-a59a-43e2-98cb-8a33beba89b6",
+                    "chat_id": "chat_id_2",
                     "chat_start_date": "2025-02-24 07:45:40 AM",
                     "chat_title": "Not Active",
                     "chat_llm_name": "deep.seekr1:32b",
@@ -56,6 +57,8 @@ def mock_data():
             ]
         }
     ]
+    logger.debug("mock_data loading")
+    return copy.deepcopy(data)
 
 @pytest.fixture
 def chat_history_manager():
@@ -65,13 +68,56 @@ def chat_history_manager():
             manager = ChatHistoryManager.singleton()
     yield manager
     # Cleanup the singleton instance for other tests
+    #logger.debug("Calling ChatHistoryManager._instance = None")
+    time.sleep(1) 
     ChatHistoryManager._instance = None
+
+def test_delete_chat_history_item(chat_history_manager):
+    new_chat_item = ChatHistoryItem(project_id='deep-dive', chat_id='chat_id_1')
+    results = chat_history_manager.delete_chat_history_item(new_chat_item)
+    logger.debug(f"{inspect.currentframe().f_code.co_name} results={results}")
+    remaining_chats = chat_history_manager.get_chat_history('deep-dive')
+    logger.debug(f"{inspect.currentframe().f_code.co_name} remaining_chats={remaining_chats}")
+    assert len(remaining_chats) == 1
+    assert remaining_chats[0]['chat_id'] == 'chat_id_2'
+
+def test_delete_active_chat_history_item(chat_history_manager):
+    chat_item = ChatHistoryItem(project_id='deep-dive', chat_id='chat_id_2')
+    results = chat_history_manager.delete_chat_history_item(chat_item)
+    remaining_chats = chat_history_manager.get_chat_history('deep-dive')
+    logger.debug(f"{inspect.currentframe().f_code.co_name} results={results}")
+    assert len(remaining_chats) == 1
+    assert remaining_chats[0]['chat_id'] == 'chat_id_1'
+    assert remaining_chats[0]['active_chat'] is True
+
+
+def test_get_active_chat(chat_history_manager):
+    active_chat = chat_history_manager.get_active_chat('deep-dive')
+    logger.debug(f"{inspect.currentframe().f_code.co_name} results={active_chat}")
+    assert active_chat['chat_id'] == 'chat_id_2'
+    assert active_chat['active_chat'] is True
+
+def test_set_active_chat(chat_history_manager):
+    chat_item = ChatHistoryItem(project_id='deep-dive', chat_id='chat_id_1')
+    chat_history_manager.set_active_chat(chat_item)
+    chat_history = chat_history_manager.get_chat_history('deep-dive')
+    logger.debug(f"{inspect.currentframe().f_code.co_name} results={chat_history}")
+    assert chat_history[0]['active_chat'] is True
+    assert chat_history[1]['active_chat'] is False
+    
+def test_update_chat_history_item_title(chat_history_manager):
+    new_chat_item = ChatHistoryItem(project_id='deep-dive', chat_id='chat_id_1', chat_title='Updated Chat Title')
+    chat_history_manager.update_chat_history_item_title(new_chat_item)
+    results = chat_history_manager.get_chat_history('deep-dive')
+    logger.debug(f"{inspect.currentframe().f_code.co_name} results={results}")
+    assert results[0]['chat_title'] == 'Updated Chat Title'
+
 
 def test_get_chat_history(chat_history_manager):
     result = chat_history_manager.get_chat_history('deep-dive')
     assert len(result) == 2
-    assert result[0]['chat_id'] == '893c5dc2-9ca8-4a5d-9562-f2ae4abc41b6'
-    assert result[1]['chat_id'] == '4edea6c2-a59a-43e2-98cb-8a33beba89b6'
+    assert result[0]['chat_id'] == 'chat_id_1'
+    assert result[1]['chat_id'] == 'chat_id_2'
 
 def test_delete_chat_history(chat_history_manager):
     chat_history_manager.delete_chat_history('deep-dive')
@@ -79,44 +125,14 @@ def test_delete_chat_history(chat_history_manager):
     assert len(result) == 0
     
 
+
 def test_create_chat_history_item(chat_history_manager):
     new_chat_item = ChatHistoryItem(project_id='deep-dive')
-    result = chat_history_manager.create_chat_history_item(new_chat_item)
-    assert result['project_id'] == 'deep-dive'
-    assert result['active_chat'] is True
-    assert 'chat_id' in result
-    assert 'chat_start_date' in result
-    logging.debug(f"results {result}")
+    results = chat_history_manager.create_chat_history_item(new_chat_item)
+    assert results['project_id'] == 'deep-dive'
+    assert results['active_chat'] is True
+    assert 'chat_id' in results
+    assert 'chat_start_date' in results
+    logger.debug(f"{inspect.currentframe().f_code.co_name} results={results}")
         
-def test_update_chat_history_item_title(chat_history_manager):
-    new_chat_item = ChatHistoryItem(project_id='deep-dive', chat_id='893c5dc2-9ca8-4a5d-9562-f2ae4abc41b6', chat_title='Updated Chat Title')
-    chat_history_manager.update_chat_history_item_title(new_chat_item)
-    result = chat_history_manager.get_chat_history('deep-dive')
-    assert result[0]['chat_title'] == 'Updated Chat Title'
 
-def test_delete_chat_history_item(chat_history_manager):
-    new_chat_item = ChatHistoryItem(project_id='deep-dive', chat_id='893c5dc2-9ca8-4a5d-9562-f2ae4abc41b6')
-    result = chat_history_manager.delete_chat_history_item(new_chat_item)
-    remaining_chats = chat_history_manager.get_chat_history('deep-dive')
-    assert len(remaining_chats) == 1
-    assert remaining_chats[0]['chat_id'] == '4edea6c2-a59a-43e2-98cb-8a33beba89b6'
-
-def test_delete_active_chat_history_item(chat_history_manager):
-    chat_item = ChatHistoryItem(project_id='deep-dive', chat_id='4edea6c2-a59a-43e2-98cb-8a33beba89b6')
-    result = chat_history_manager.delete_chat_history_item(chat_item)
-    remaining_chats = chat_history_manager.get_chat_history('deep-dive')
-    assert len(remaining_chats) == 1
-    assert remaining_chats[0]['chat_id'] == '893c5dc2-9ca8-4a5d-9562-f2ae4abc41b6'
-    assert remaining_chats[0]['active_chat'] is True
-
-def test_get_active_chat(chat_history_manager):
-    active_chat = chat_history_manager.get_active_chat('deep-dive')
-    assert active_chat['chat_id'] == '4edea6c2-a59a-43e2-98cb-8a33beba89b6'
-    assert active_chat['active_chat'] is True
-
-def test_set_active_chat(chat_history_manager):
-    chat_item = ChatHistoryItem(project_id='deep-dive', chat_id='893c5dc2-9ca8-4a5d-9562-f2ae4abc41b6')
-    chat_history_manager.set_active_chat(chat_item)
-    chat_history = chat_history_manager.get_chat_history('deep-dive')
-    assert chat_history[0]['active_chat'] is True
-    assert chat_history[1]['active_chat'] is False

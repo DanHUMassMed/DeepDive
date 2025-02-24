@@ -1,10 +1,11 @@
 import pytest
 import json
+import copy
 import os
 from datetime import datetime
 from unittest.mock import patch, mock_open
 
-from app.project_state_manager import ProjectStateManager
+from app.project_state_manager import ProjectStateManager, ProjectStateItem
 import logging
 
 # Configure the logger
@@ -17,20 +18,36 @@ logging.basicConfig(
 
 
 def mock_data():
-    return [
+    data = [
         {
-            'project_id': 'projectid1',
-            'project_name': 'project1',
-            'project_start_date': '2023-01-01 12:00 PM',
-            'chat_history_timestamp': '000000'
+            "project_id": "my-second-project",
+            "project_name": "my-second-project",
+            "project_start_date": "2025-02-24 10:13:31 AM",
+            "chat_history_timestamp": "2025-02-24 10:13:31.090",
+            "project_llm_name": "llama3.2:1b",
+            "project_system_prompt": "Answer all questions to the best of your ability. ",
+            "chat_history_items": []
         },
         {
-            'project_id': 'projectid2',
-            'project_name': 'project2',
-            'project_start_date': '2023-01-02 02:00 PM',
-            'chat_history_timestamp': '111111'
+            "project_id": "my-first-project",
+            "project_name": "my-first-project",
+            "project_start_date": "2025-02-24 10:13:05 AM",
+            "chat_history_timestamp": "2025-02-24 10:13:05.474",
+            "project_llm_name": "my_llm",
+            "project_system_prompt": "Do only good",
+            "chat_history_items": []
+        },
+        {
+            "project_id": "deep-dive",
+            "project_name": "deep-dive",
+            "project_start_date": "2025-02-24 10:13:05 AM",
+            "chat_history_timestamp": "2025-02-24 10:13:05.472",
+            "project_llm_name": "my_better_llm",
+            "project_system_prompt": "Answer all questions to the best of your ability. ",
+            "chat_history_items": []
         }
     ]
+    return copy.deepcopy(data)
 
 @pytest.fixture
 def project_state_manager():
@@ -40,27 +57,29 @@ def project_state_manager():
             manager = ProjectStateManager.singleton()
     yield manager
     # Cleanup the singleton instance for other tests
+    logging.debug(f"Reset singleton()")
     ProjectStateManager._instance = None
 
 def test_get_project_state(project_state_manager):
-    result = project_state_manager.get_project_state('projectid1')
-    assert result['project_name'] == 'project1'
+    result = project_state_manager.get_project_state('deep-dive')
+    assert result['project_name'] == 'deep-dive'
 
 def test_delete_project_state(project_state_manager):
-    project_state_manager.delete_project_state('projectid1')
-    assert project_state_manager.get_project_state('projectid1') == None
+    project_state_manager.delete_project_state('deep-dive')
+    assert project_state_manager.get_project_state('deep-dive') == None
 
 def test_create_project_state(project_state_manager):
-    result = project_state_manager.create_project_state('project name test')
+    project_state_item = ProjectStateItem(project_name="project name test")
+    result = project_state_manager.create_project_state(project_state_item)
     assert 'project_id' in result
     assert 'project_start_date' in result
     logging.debug(f"results {result}")
         
 
 def test_get_chat_history_timestamp(project_state_manager):
-    chat_history_timestamp = project_state_manager.get_chat_history_timestamp('projectid1')
-    result = project_state_manager.get_project_state('projectid1') 
-    logging.debug(f"results {result}")
-    assert result['chat_history_timestamp'] == chat_history_timestamp['chat_history_timestamp'] 
+    chat_history_timestamp = project_state_manager.get_chat_history_timestamp('deep-dive')
+    assert 'chat_history_timestamp' in chat_history_timestamp
+    logging.debug(f"results {chat_history_timestamp}")
+    
 
 

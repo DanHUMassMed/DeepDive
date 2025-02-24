@@ -11,6 +11,7 @@ from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 from langgraph.graph import START, MessagesState, StateGraph
 from app.utils.utilities import setup_logging
 import logging
+from app import constants
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -42,7 +43,7 @@ class SessionManager:
     
     
 class UserSession:
-    def __init__(self, project_id, system_prompt=None):
+    def __init__(self, project_id):
         logger.debug(f"ENTERING UserSession.__init__ with project_id={project_id} and system_prompt={system_prompt}")    
         self._db_path = f"{get_parent_directory()}/resources/checkpoints.db"
         self._model = init_chat_model("llama3.2:1b", model_provider="ollama")
@@ -61,7 +62,7 @@ class UserSession:
         if system_prompt:
             self.system_prompt = system_prompt
         else:
-            self.system_prompt = "Answer all questions to the best of your ability. Answer concisely but correctly. If you do not know the answer, just say 'I don’t know.'"
+            self.system_prompt = constants.DEFAULT_SYSTEM_PROMPT
         self.graph = self._create_graph()
         
         

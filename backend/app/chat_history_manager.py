@@ -21,14 +21,6 @@ class ChatHistoryItem:
     chat_llm_name: Optional[str] = None
     active_chat: Optional[bool] = None
       
-@dataclass
-class ChatHistory:
-    project_id: str
-    project_name: Optional[str] = None
-    project_start_date: Optional[str] = None
-    chat_history_timestamp: Optional[str] = None
-    chat_history_items: List[ChatHistoryItem] = field(default_factory=list)   
-
 
 class ChatHistoryManager(BaseManager):
     def get_chat_history(self, project_id):
@@ -96,7 +88,7 @@ class ChatHistoryManager(BaseManager):
                 self._update_chat_and_timestamp(chat_history_item.project_id, chat_history_items)
                 return existing_item
             
-        logger.debug(f"EXITING Exception")
+        logger.debug(f"EXITING Exception: Chat ID {chat_history_item.chat_id} not found.")
         raise Exception(f"Chat ID {chat_history_item.chat_id} not found.")
               
 
