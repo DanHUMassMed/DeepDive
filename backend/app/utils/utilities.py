@@ -11,6 +11,9 @@ def setup_logging(config_path='logging_config.ini'):
         logging.basicConfig(level=logging.DEBUG)
         logging.warning(f"Logging configuration file '{config_path}' not found. Using default logging configuration.")
         
+    return logging.getLogger("app")
+
+        
 def open_ollama():
     try:
         # Open Ollama (assuming it's a GUI app located in /Applications)

@@ -1,8 +1,40 @@
 [
     {
+        "project_id": "my-second-project",
+        "project_name": "my-second-project",
+        "project_start_date": "2025-02-24 07:32:35 AM",
+        "chat_history_timestamp": "2025-02-24 07:32:35.262",
+        "chat_history_items": []
+    },
+    {
+        "project_id": "my-first-project",
+        "project_name": "my-first-project",
+        "project_start_date": "2025-02-24 07:32:35 AM",
+        "chat_history_timestamp": "2025-02-24 07:32:35.261",
+        "chat_history_items": []
+    },
+    {
         "project_id": "deep-dive",
         "project_name": "deep-dive",
-        "project_start_date": "2025-02-22 02:03:48 PM",
-        "chat_history_timestamp": "2025-02-22 20:18:09.516"
+        "project_start_date": "2025-02-24 07:32:35 AM",
+        "chat_history_timestamp": "2025-02-24 08:44:35.679",
+        "chat_history_items": [
+            {
+                "project_id": "deep-dive",
+                "chat_id": "893c5dc2-9ca8-4a5d-9562-f2ae4abc41b6",
+                "chat_start_date": "2025-02-24 07:59:38 AM",
+                "chat_title": "Chat on 2025-02-24 07:59:38 AM",
+                "chat_llm_name": "deep.seekr1:32b",
+                "active_chat": true
+            },
+            {
+                "project_id": "deep-dive",
+                "chat_id": "4edea6c2-a59a-43e2-98cb-8a33beba89b6",
+                "chat_start_date": "2025-02-24 07:45:40 AM",
+                "chat_title": "Not Active",
+                "chat_llm_name": "deep.seekr1:32b",
+                "active_chat": false
+            }
+        ]
     }
 ]

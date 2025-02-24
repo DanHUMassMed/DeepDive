@@ -4,15 +4,13 @@ import os
 import requests
 from app.session_manager import SessionManager
 from app.chat_history_manager import ChatHistoryItem, ChatHistoryManager
-from app.project_state_manager import ProjectStateManager, ProjectState
+from app.project_state_manager import ProjectStateManager
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import logging
 from app.utils.utilities import open_ollama, setup_logging
 
-setup_logging()
-logger = logging.getLogger(__name__)
+logger = setup_logging()
 
 # localhost:8000
 app = FastAPI()

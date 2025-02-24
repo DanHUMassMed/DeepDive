@@ -3,132 +3,52 @@ import os
 import uuid
 from dataclasses import asdict
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
+from dataclasses import dataclass, field
 import logging
+from app.utils.utilities import open_ollama, setup_logging
+from app.base_manager import BaseManager
 
-from pydantic.dataclasses import dataclass
-# Configure the logger
-logging.basicConfig(
-    filename='debug.log',        # Log file name
-    filemode='a',              # Append mode; use 'w' to overwrite
-    format='%(asctime)s %(levelname)s: %(message)s',
-    level=logging.DEBUG       # Set the logging level
-)
-
-@dataclass
-class ProjectState:
-    project_id: Optional[str] = None
-    project_name: Optional[str] = None
-    chat_history_timestamp: Optional[str] = ''
-    project_start_date: Optional[str] = None
+logger = setup_logging()
     
 
-class ProjectStateManager:
-    _instance = None
-    _file_name = "resources/project_state.json"
+class ProjectStateManager(BaseManager):
     
-    def __init__(self):
-        if ProjectStateManager._instance is not None:
-            raise Exception("This class is a singleton! Use sigleton() to get the instance.")
-        self.project_state_data = self._load_project_state()
-
-    @classmethod
-    def singleton(cls):
-        if cls._instance is None:
-            cls._instance = cls()
-        return cls._instance
-    
-    def _load_project_state(self):
-        """Load project state from the JSON file or return an empty list if the file doesn't exist."""
-        if os.path.exists(self._file_name):
-            with open(self._file_name, 'r', encoding="utf-8") as file:
-                try:
-                    return json.load(file)
-                except json.JSONDecodeError:
-                    return []
-        return []
-
-    def _save_project_state(self):
-        """Save the current project state data to the JSON file. Ensure the directory exists."""
-        # Get the directory from the file name
-        directory = os.path.dirname(self._file_name)
-
-        # Create the directory if it doesn't exist
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-
-        # Write the data to the file
-        with open(self._file_name, 'w', encoding="utf-8") as file:
-            json.dump(self.project_state_data, file, indent=4)
-
     def get_project_state(self, project_id):
         """Return a project state item for the given project_id."""
-        for item in self.project_state_data:
-            if item['project_id'] == project_id:
-                return item
-            else:
-                return None
+        return_fields=['project_name','project_start_date','chat_history_timestamp']
+        return self._search('project_id', project_id, return_fields)
 
     def delete_project_state(self, project_id):
         """Delete project state item for the given project_id and save the updated list to disk."""
-        self.project_state_data = [item for item in self.project_state_data if item['project_id'] != project_id]
-        self._save_project_state()
-
+        self._delete('project_id', project_id)
     
-    def create_project_state(self, project_state: ProjectState):
+    def create_project_state(self, project_name):
         """Add a new project state item to the list."""
+        project_state_item = {}
+        
+        # Ensure project_name is unique; 
+        if self._search('project_id', project_name):
+            return {'Error':f"Project Name {project_name} already exists. Project name must be unique."}
 
-        # Ensure project_id is unique; if not provided, generate one
-        if not project_state.project_id:
-            project_state.project_id = str(uuid.uuid4())
-        else:
-            for item in self.project_state_data:
-                if item.project_id == project_state.project_id:
-                    raise Exception(f"Project Id {project_state.project_id} already exists. Project Id must be unique.")
-
-        # Ensure project_id is provided
-        if not project_state.project_id:
-            raise Exception("project_id must be provided for project state.")
-
-        # Set the current date and time if not provided
-        if not project_state.project_start_date:
-            project_state.project_start_date = datetime.now().strftime('%Y-%m-%d %I:%M:%S %p')
-
-        # Set the project_name if not provided or blank
-        if not project_state.project_name:
-            project_state.project_name = f"Project on {project_state.project_start_date}"
-       
+        project_state_item['project_id'] = project_name 
+        project_state_item['project_name'] = project_name
+        project_state_item['project_start_date']=datetime.now().strftime('%Y-%m-%d %I:%M:%S %p')
+        chat_history_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.") + f"{datetime.now().microsecond // 1000:03d}"
+        project_state_item['chat_history_timestamp'] = chat_history_timestamp
+        project_state_item['chat_history_items'] = []
+        
         # Add the new project state item to the data
-        self.project_state_data.insert(0, asdict(project_state))
+        self.project_state_data.insert(0, project_state_item)
 
         # Save the updated chat history data to disk
         self._save_project_state()
         
-        return asdict(project_state)
-        
-        
-    def update_project_state_name(self, project_id, project_name):
-        """Update an existing project state item if found, and save the updated list to disk."""
-        for idx, existing_item in enumerate(self.project_state_data):
-            if existing_item['project_id'] == project_id:
-                existing_item['project_name'] = project_name
-                self.project_state_data[idx] = existing_item
-                self._save_project_state()
-                return
-            else:
-                raise Exception(f"Project Id {project_id} not found.")
-            
-    def update_chat_history_timestamp(self, project_id):
-        """Update an existing project state item if found, and save the updated list to disk."""
-        # Get the current timestamp with milliseconds
-        chat_history_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.") + f"{datetime.now().microsecond // 1000:03d}"
-        
-        for idx, existing_item in enumerate(self.project_state_data):
-            if existing_item['project_id'] == project_id:
-                existing_item['chat_history_timestamp'] = chat_history_timestamp
-                self.project_state_data[idx] = existing_item
-                self._save_project_state()
-                return chat_history_timestamp
-        else:
-            raise Exception(f"Project Id {project_id} not found.")
+        return project_state_item
+                            
+
+    def get_chat_history_timestamp(self, project_id):
+        """Get an existing project state item if found, and return chat_history_timestamp"""
+        return_fields = ['chat_history_timestamp']
+        return self._search('project_id', project_id, return_fields)
         

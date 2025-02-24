@@ -1,186 +1,161 @@
-import json
-import os
-import uuid
-from dataclasses import asdict
-from datetime import datetime
-from typing import Optional
 import logging
-from app.utils.utilities import open_ollama, setup_logging
+import uuid
+from dataclasses import asdict, field
+from datetime import datetime
+from typing import List, Optional
 
-setup_logging()
-logger = logging.getLogger(__name__)
-
+from app import constants
+from app.base_manager import BaseManager
+from app.utils.utilities import setup_logging
 from pydantic.dataclasses import dataclass
-# Configure the logger
-logging.basicConfig(
-    filename='debug.log',        # Log file name
-    filemode='a',              # Append mode; use 'w' to overwrite
-    format='%(asctime)s %(levelname)s: %(message)s',
-    level=logging.DEBUG       # Set the logging level
-)
+
+logger = setup_logging()
+
 
 @dataclass
 class ChatHistoryItem:
     project_id: str
     chat_id: Optional[str] = None
-    chat_start_date: Optional[str] = None  
+    chat_start_date: Optional[str] = None
     chat_title: Optional[str] = None
     chat_llm_name: Optional[str] = None
     active_chat: Optional[bool] = None
-    
+      
+@dataclass
+class ChatHistory:
+    project_id: str
+    project_name: Optional[str] = None
+    project_start_date: Optional[str] = None
+    chat_history_timestamp: Optional[str] = None
+    chat_history_items: List[ChatHistoryItem] = field(default_factory=list)   
 
-class ChatHistoryManager:
-    _instance = None
-    _file_name = "resources/chat_history.json"
-    
-    def __init__(self):
-        if ChatHistoryManager._instance is not None:
-            raise Exception("This class is a singleton! Use singleton() to get the instance.")
-        self.chat_history_data = self._load_chat_history()
 
-    @classmethod
-    def singleton(cls):
-        if cls._instance is None:
-            cls._instance = cls()
-        return cls._instance
-    
-    def _load_chat_history(self):
-        """Load chat history from the JSON file or return an empty list if the file doesn't exist."""
-        if os.path.exists(self._file_name):
-            with open(self._file_name, 'r', encoding="utf-8") as file:
-                try:
-                    return json.load(file)
-                except json.JSONDecodeError:
-                    return []
-        return []
-
-    def _save_chat_history(self):
-        """Save the current chat history data to the JSON file. Ensure the directory exists."""
-        # Get the directory from the file name
-        directory = os.path.dirname(self._file_name)
-
-        # Create the directory if it doesn't exist
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-
-        # Write the data to the file
-        with open(self._file_name, 'w', encoding="utf-8") as file:
-            json.dump(self.chat_history_data, file, indent=4)
-
+class ChatHistoryManager(BaseManager):
     def get_chat_history(self, project_id):
         """Return a list of chat history items for the given project_id."""
-        return [item for item in self.chat_history_data if item['project_id'] == project_id]
+        return_fields = ['chat_history_items']
+        search_results = self._search('project_id', project_id, return_fields)
+        return search_results.get('chat_history_items', None)
 
     def delete_chat_history(self, project_id):
         """Delete all chat history items for the given project_id and save the updated list to disk."""
-        self.chat_history_data = [item for item in self.chat_history_data if item['project_id'] != project_id]
-        self._save_chat_history()
-
+        update_fields= { 'chat_history_items':[] }
+        self._update('project_id', project_id, update_fields)
+        self._update_chat_history_timestamp(project_id)
     
     def create_chat_history_item(self, chat_history_item: ChatHistoryItem):
         """Add a new chat history item to the list if the chat_id is unique and set active_chat=True."""
-
-        # Ensure chat_id is unique; if not provided, generate one
-        if not chat_history_item.chat_id:
-            chat_history_item.chat_id = str(uuid.uuid4())
-        else:
-            for item in self.chat_history_data:
-                if item.chat_id == chat_history_item.chat_id:
-                    raise Exception(f"Chat ID {chat_history_item.chat_id} already exists. Chat ID must be unique.")
 
         # Ensure project_id is provided
         if not chat_history_item.project_id:
             raise Exception("project_id must be provided for chat history.")
 
-        # Set the current date and time if not provided
-        if not chat_history_item.chat_start_date:
-            #chat_history_item.chat_start_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            chat_history_item.chat_start_date = datetime.now().strftime('%Y-%m-%d %I:%M:%S %p')
+        # Get the chat history for this project id
+        chat_history_items = self.get_chat_history(chat_history_item.project_id)
 
-        # Set the chat_title if not provided or blank
+        # We need a new chat_id 
+        chat_history_item.chat_id = str(uuid.uuid4())
+
+        # Add a start date for the chat
+        chat_history_item.chat_start_date = datetime.now().strftime('%Y-%m-%d %I:%M:%S %p')
+
+        # Set the chat_title if it is not provided or blank
         if not chat_history_item.chat_title:
             chat_history_item.chat_title = f"Chat on {chat_history_item.chat_start_date}"
 
-        # Set chat_llm_name if not provided or blank
+        # Set chat_llm_name if it is not provided or blank
         if not chat_history_item.chat_llm_name:
-            chat_history_item.chat_llm_name = 'deep.seekr1:32b'
+            chat_history_item.chat_llm_name = constants.DEFAULT_LLM
 
-        # Set the new chat's active_chat to True
+        # Set this as the active_chat
         chat_history_item.active_chat = True
-
-        # Set active_chat for other items of the same user to False
-        self._set_active_chat_for_user(chat_history_item.project_id, chat_history_item.chat_id)
+        self._set_active_chat(chat_history_items, chat_history_item.chat_id)
 
         # Add the new chat history item to the data
-        self.chat_history_data.insert(0, asdict(chat_history_item))
+        chat_history_items.insert(0, asdict(chat_history_item))
+        
+        # Save the updated chat_history_items
+        self._update_chat_and_timestamp(chat_history_item.project_id, chat_history_items)
 
-        # Save the updated chat history data to disk
-        self._save_chat_history()
-        
         return asdict(chat_history_item)
+
         
-        
-    def update_chat_history_item_title(self, chat_id, chat_title):
+    def update_chat_history_item_title(self, chat_history_item: ChatHistoryItem):
         """Update an existing chat history item if found, and save the updated list to disk."""
-        logger.debug(f"ENTERING update_chat_history_item_title with={chat_id} and title={chat_title}")
-        for idx, existing_item in enumerate(self.chat_history_data):
+        logger.debug(f"ENTERING update_chat_history_item_title with={chat_history_item.chat_id} and title={chat_history_item.chat_title}")
+        chat_history_items = self.get_chat_history(chat_history_item.project_id)
+
+        for idx, existing_item in enumerate(chat_history_items):
             logger.debug(f"IN 1")
-            if existing_item['chat_id'] == chat_id:
+            if existing_item['chat_id'] == chat_history_item.chat_id:
                 logger.debug(f"IN 2")
-                existing_item['chat_title'] = chat_title
-                self.chat_history_data[idx] = existing_item
-                self._save_chat_history()
+                existing_item['chat_title'] = chat_history_item.chat_title
+                chat_history_items[idx] = existing_item
+                
+                # Save the updated chat_history_items
+                self._update_chat_and_timestamp(chat_history_item.project_id, chat_history_items)
                 return existing_item
             
         logger.debug(f"EXITING Exception")
-        raise Exception(f"Chat ID {chat_id} not found.")
-        
-    
-    def update_chat_history_item_model_name(self, chat_id, chat_llm_name):
-        """Update an existing chat history item if found, and save the updated list to disk."""
-        for idx, existing_item in enumerate(self.chat_history_data):
-            if existing_item['chat_id'] == chat_id:
-                existing_item['chat_llm_name'] = chat_llm_name
-                self.chat_history_data[idx] = existing_item
-                self._save_chat_history()
-                return
-            else:
-                raise Exception(f"Chat ID {chat_id} not found.")
-        
-        
+        raise Exception(f"Chat ID {chat_history_item.chat_id} not found.")
+              
 
-    def delete_chat_history_item(self, chat_id):
-        """Delete a specific chat history item by chat_id and return the remaining items for the user."""
-        #TODO If chat item is the active item select an alternative as active
-        for idx, existing_item in enumerate(self.chat_history_data):
-            if existing_item['chat_id'] == chat_id:
-                del self.chat_history_data[idx]
-                self._save_chat_history()
-                return {'status':'SUCCESS'}
+    def delete_chat_history_item(self, chat_history_item: ChatHistoryItem):
+        """Delete a specific chat history item by chat_id and return status"""
+        chat_history_items = self.get_chat_history(chat_history_item.project_id)
+        for idx, existing_item in enumerate(chat_history_items):
+                if existing_item['chat_id'] == chat_history_item.chat_id:
+                    del chat_history_items[idx]
+                    
+                    # If the deleted chat was the active chat select a new active chat
+                    # The new active chat is always the newest chat in the list
+                    if existing_item['active_chat']:
+                        if len(chat_history_items)>0:
+                            self._set_active_chat(chat_history_items, chat_history_items[0]['chat_id'])
+                    # Save the updated chat_history_items
+                    self._update_chat_and_timestamp(chat_history_item.project_id, chat_history_items)
+                    return {'status':'SUCCESS'}
         return {'status':'FAIL'}
 
     def get_active_chat(self, project_id):
         """Return the active chat history item for the given project_id."""
-        for item in self.chat_history_data:
-            if item['project_id'] == project_id and item['active_chat']:
+        chat_history_items = self.get_chat_history(project_id)
+        for item in chat_history_items:
+            if item['active_chat']:
                 return item
         return None  # No active chat found
 
-    def set_active_chat(self, chat_id):
+    def set_active_chat(self, chat_history_item: ChatHistoryItem):
         """Set the active chat for the user related to the given chat_id."""
-        for item in self.chat_history_data:
-            if item['chat_id'] == chat_id:
-                project_id = item['project_id']
-                self._set_active_chat_for_user(project_id, chat_id)
-                self._save_chat_history()
-                return
-        raise Exception(f"Chat ID {chat_id} not found.")
+        chat_history_items = self.get_chat_history(chat_history_item.project_id)
+        for item in chat_history_items:
+                item['active_chat'] = True
+                self._set_active_chat(chat_history_items, chat_history_item.chat_id)
+                # Save the updated chat_history_items
+                self._update_chat_and_timestamp(chat_history_item.project_id, chat_history_items)
+                return item
+        raise Exception(f"Chat ID {chat_history_item.chat_id} not found.")
 
-    def _set_active_chat_for_user(self, project_id, chat_id):
+    def _set_active_chat(self, chat_history_data, chat_id):
         """Set the provided chat_id's active_chat to True and all others for the same user to False."""
-        for item in self.chat_history_data:
-            if item['project_id'] == project_id:
-                if item['chat_id'] == chat_id:
-                    item['active_chat'] = True
-                else:
-                    item['active_chat'] = False
+        for item in chat_history_data:
+            if item['chat_id'] == chat_id:
+                item['active_chat'] = True
+            else:
+                item['active_chat'] = False
+                
+        return chat_history_data
+                    
+    def _update_chat_history_timestamp(self, project_id):
+        """Update an existing project state item if found, and save the updated list to disk."""
+        chat_history_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.") + f"{datetime.now().microsecond // 1000:03d}"
+        update_fields= { 'chat_history_timestamp':chat_history_timestamp }
+        self._update('project_id', project_id, update_fields)
+        
+    def _update_chat_and_timestamp(self, project_id, chat_history_items):
+        # Save the updated chat_history_items
+        update_fields= { 'chat_history_items':chat_history_items }
+        self._update('project_id', project_id, update_fields)
+        self._update_chat_history_timestamp(project_id)
+        
+

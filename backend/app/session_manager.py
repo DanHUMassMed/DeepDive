@@ -42,11 +42,22 @@ class SessionManager:
     
     
 class UserSession:
-    def __init__(self, project_id, system_prompt=None):    
+    def __init__(self, project_id, system_prompt=None):
+        logger.debug(f"ENTERING UserSession.__init__ with project_id={project_id} and system_prompt={system_prompt}")    
         self._db_path = f"{get_parent_directory()}/resources/checkpoints.db"
-        self._model = init_chat_model("deepseek-r1:32b", model_provider="ollama")
+        self._model = init_chat_model("llama3.2:1b", model_provider="ollama")
         self.project_id = project_id                  
         self.chat_history_manager = ChatHistoryManager.singleton()
+        active_chat = self.chat_history_manager.get_active_chat(self.project_id)
+        logger.debug(f"IN active_chat={active_chat}")    
+        if active_chat is None:
+            logger.debug(f"IN before create_chat_history_item")  
+            chat_item = ChatHistoryItem(project_id=self.project_id)
+            self.chat_history_manager.create_chat_history_item(chat_item)
+            logger.debug(f"IN after create_chat_history_item")   
+        
+        #active_chat = self.chat_history_manager.get_active_chat(self.project_id)
+        #logger.debug(f"IN active_chat={active_chat}")   
         if system_prompt:
             self.system_prompt = system_prompt
         else:
@@ -88,25 +99,19 @@ class UserSession:
 
         return graph
 
+
     def create_new_chat(self, chat_history_item: ChatHistoryItem):
         logger.debug(f"ENTERING create_new_chat with={self.project_id}")
         active_chat = self.chat_history_manager.get_active_chat(self.project_id)
         logger.debug(f"active_chat == {active_chat}")
-        if active_chat is not None:
+        if active_chat:
             number_of_messages_in_current_chat = self.get_chat_interactions_count(active_chat['chat_id'])
             if number_of_messages_in_current_chat == 0:
+                # If we have not had any interaction on the active chat just remove it
                 self.chat_history_manager.delete_chat_history_item(active_chat['chat_id'])
+        
         new_chat = self.chat_history_manager.create_chat_history_item(chat_history_item)
-
-        # new_chat =     {
-        #     "project_id": "deep-dive",
-        #     "chat_id": "8b353d98-8705-48e8-ab9b-a4f4863f707f",
-        #     "chat_start_date": "2025-02-21 07:56:55 AM",
-        #     "chat_title": "Chat on FME",
-        #     "chat_llm_name": "deep.seekr1:32b",
-        #     "active_chat": True
-        # }
-
+        logger.debug(f"EXITING create_new_chat with={new_chat}")
         return new_chat
     
 

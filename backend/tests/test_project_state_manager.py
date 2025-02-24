@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 from unittest.mock import patch, mock_open
 
-from app.project_state_manager import ProjectStateManager, ProjectState
+from app.project_state_manager import ProjectStateManager
 import logging
 
 # Configure the logger
@@ -51,22 +51,16 @@ def test_delete_project_state(project_state_manager):
     assert project_state_manager.get_project_state('projectid1') == None
 
 def test_create_project_state(project_state_manager):
-    new_project_state = ProjectState()
-    result = project_state_manager.create_project_state(new_project_state)
+    result = project_state_manager.create_project_state('project name test')
     assert 'project_id' in result
     assert 'project_start_date' in result
     logging.debug(f"results {result}")
         
-def test_update_project_state_name(project_state_manager):
-    project_state_manager.update_project_state_name('projectid1', 'Updated Project Name')
-    result = project_state_manager.get_project_state('projectid1') 
-    logging.debug(f"results {result}")
-    assert result['project_name'] == 'Updated Project Name'
 
-def test_update_chat_history_timestamp(project_state_manager):
-    chat_history_timestamp = project_state_manager.update_chat_history_timestamp('projectid1')
+def test_get_chat_history_timestamp(project_state_manager):
+    chat_history_timestamp = project_state_manager.get_chat_history_timestamp('projectid1')
     result = project_state_manager.get_project_state('projectid1') 
     logging.debug(f"results {result}")
-    assert result['chat_history_timestamp'] == chat_history_timestamp
+    assert result['chat_history_timestamp'] == chat_history_timestamp['chat_history_timestamp'] 
 
 
