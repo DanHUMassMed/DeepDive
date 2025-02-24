@@ -6,7 +6,7 @@ from typing import List, Optional
 
 from app import constants
 from app.base_manager import BaseManager
-from app.utils.utilities import setup_logging
+from app.utils.utilities import setup_logging,trace
 from pydantic.dataclasses import dataclass
 
 logger = setup_logging()
@@ -23,18 +23,21 @@ class ChatHistoryItem:
       
 
 class ChatHistoryManager(BaseManager):
+    @trace(logger)
     def get_chat_history(self, project_id):
         """Return a list of chat history items for the given project_id."""
         return_fields = ['chat_history_items']
         search_results = self._search('project_id', project_id, return_fields)
         return search_results.get('chat_history_items', None)
 
+    @trace(logger)
     def delete_chat_history(self, project_id):
         """Delete all chat history items for the given project_id and save the updated list to disk."""
         update_fields= { 'chat_history_items':[] }
         self._update('project_id', project_id, update_fields)
         self._update_chat_history_timestamp(project_id)
     
+    @trace(logger)
     def create_chat_history_item(self, chat_history_item: ChatHistoryItem):
         """Add a new chat history item to the list if the chat_id is unique and set active_chat=True."""
 
@@ -72,6 +75,7 @@ class ChatHistoryManager(BaseManager):
         return asdict(chat_history_item)
 
         
+    @trace(logger)
     def update_chat_history_item_title(self, chat_history_item: ChatHistoryItem):
         """Update an existing chat history item if found, and save the updated list to disk."""
         logger.debug(f"ENTERING update_chat_history_item_title with={chat_history_item.chat_id} and title={chat_history_item.chat_title}")
@@ -91,7 +95,7 @@ class ChatHistoryManager(BaseManager):
         logger.debug(f"EXITING Exception: Chat ID {chat_history_item.chat_id} not found.")
         raise Exception(f"Chat ID {chat_history_item.chat_id} not found.")
               
-
+    @trace(logger)
     def delete_chat_history_item(self, chat_history_item: ChatHistoryItem):
         """Delete a specific chat history item by chat_id and return status"""
         chat_history_items = self.get_chat_history(chat_history_item.project_id)
@@ -109,14 +113,16 @@ class ChatHistoryManager(BaseManager):
                     return {'status':'SUCCESS'}
         return {'status':'FAIL'}
 
+    @trace(logger)
     def get_active_chat(self, project_id):
         """Return the active chat history item for the given project_id."""
         chat_history_items = self.get_chat_history(project_id)
         for item in chat_history_items:
             if item['active_chat']:
                 return item
-        return None  # No active chat found
+        return {}  # No active chat found
 
+    @trace(logger)
     def set_active_chat(self, chat_history_item: ChatHistoryItem):
         """Set the active chat for the user related to the given chat_id."""
         chat_history_items = self.get_chat_history(chat_history_item.project_id)
@@ -128,6 +134,7 @@ class ChatHistoryManager(BaseManager):
                 return item
         raise Exception(f"Chat ID {chat_history_item.chat_id} not found.")
 
+    @trace(logger)
     def _set_active_chat(self, chat_history_data, chat_id):
         """Set the provided chat_id's active_chat to True and all others for the same user to False."""
         for item in chat_history_data:
@@ -138,12 +145,14 @@ class ChatHistoryManager(BaseManager):
                 
         return chat_history_data
                     
+    @trace(logger)
     def _update_chat_history_timestamp(self, project_id):
         """Update an existing project state item if found, and save the updated list to disk."""
         chat_history_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.") + f"{datetime.now().microsecond // 1000:03d}"
         update_fields= { 'chat_history_timestamp':chat_history_timestamp }
         self._update('project_id', project_id, update_fields)
         
+    @trace(logger)
     def _update_chat_and_timestamp(self, project_id, chat_history_items):
         # Save the updated chat_history_items
         update_fields= { 'chat_history_items':chat_history_items }

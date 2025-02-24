@@ -9,7 +9,7 @@ import remarkHtml from 'remark-html';
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { dark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import useChatEffect from '../hooks/useChatEffect';
-import { cancelActiveChat } from '../api/chatAPI';
+import { cancelActiveChat } from '../api/chatAPI.mjs';
 
 
 // DialogContainer Component - Main container for the chat UI

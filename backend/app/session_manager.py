@@ -9,13 +9,11 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 from langgraph.graph import START, MessagesState, StateGraph
-from app.utils.utilities import setup_logging
-import logging
+from app.utils.utilities import setup_logging,trace
 from app import constants
+import inspect
 
-setup_logging()
-logger = logging.getLogger(__name__)
-print(f"logger {__name__}")
+logger = setup_logging()
 
 def get_parent_directory():
     directory = os.path.dirname(__file__)
@@ -25,30 +23,41 @@ def get_parent_directory():
 class SessionManager:
     def __init__(self):
         self.active_sessions: dict = {}
-    
+        
+    @trace(logger)
     def create_session(self, project_id: str):
         """Create a session and store the LLM instance"""
         user_session = UserSession(project_id)
         self.active_sessions[project_id] = user_session
     
+    @trace(logger)
     def get_session(self, project_id: str):
         """Get the session for a user create it if it does not exist"""
+        logger.debug(f"params {project_id=}")
+        logger.debug(f"var {self.active_sessions=}")
         if project_id not in self.active_sessions:
+            logger.debug(f"NOT IN")
             self.create_session(project_id)
-            print("Creating session")
+            logger.debug(f"NOT IN after")
+            logger.debug(f"{inspect.currentframe().f_code.co_name} Creating session.")
         else:
-            print("Session already established")
+            logger.debug(f"{inspect.currentframe().f_code.co_name} Session already created.")
             
         return self.active_sessions[project_id]
     
     
 class UserSession:
+    @trace(logger)
     def __init__(self, project_id):
-        logger.debug(f"ENTERING UserSession.__init__ with project_id={project_id} and system_prompt={system_prompt}")    
+        logger.debug(f"IN1")   
         self._db_path = f"{get_parent_directory()}/resources/checkpoints.db"
+        logger.debug(f"IN2")   
         self._model = init_chat_model("llama3.2:1b", model_provider="ollama")
-        self.project_id = project_id                  
+        logger.debug(f"IN3")   
+        self.project_id = project_id
+        logger.debug(f"IN4")   
         self.chat_history_manager = ChatHistoryManager.singleton()
+        logger.debug(f"IN5")   
         active_chat = self.chat_history_manager.get_active_chat(self.project_id)
         logger.debug(f"IN active_chat={active_chat}")    
         if active_chat is None:
@@ -57,16 +66,13 @@ class UserSession:
             self.chat_history_manager.create_chat_history_item(chat_item)
             logger.debug(f"IN after create_chat_history_item")   
         
-        #active_chat = self.chat_history_manager.get_active_chat(self.project_id)
-        #logger.debug(f"IN active_chat={active_chat}")   
-        if system_prompt:
-            self.system_prompt = system_prompt
-        else:
-            self.system_prompt = constants.DEFAULT_SYSTEM_PROMPT
+
+        self.system_prompt = constants.DEFAULT_SYSTEM_PROMPT
         self.graph = self._create_graph()
         
-        
-    def _create_graph(self):    
+    @trace(logger)    
+    def _create_graph(self):
+        logger.trace(f"ENTERING  {__name__} {inspect.currentframe().f_code.co_name}")    
         #TODO THIS DOES NOT LOOK RIGHT    
         trimmer = trim_messages(
             max_tokens=6_500_000,
@@ -100,24 +106,27 @@ class UserSession:
 
         return graph
 
-
+    @trace(logger)
     def create_new_chat(self, chat_history_item: ChatHistoryItem):
-        logger.debug(f"ENTERING create_new_chat with={self.project_id}")
-        active_chat = self.chat_history_manager.get_active_chat(self.project_id)
+        logger.debug(f"params {chat_history_item.project_id=}")
+        active_chat = self.chat_history_manager.get_active_chat(chat_history_item.project_id)
         logger.debug(f"active_chat == {active_chat}")
         if active_chat:
             number_of_messages_in_current_chat = self.get_chat_interactions_count(active_chat['chat_id'])
+            logger.debug(f"IN1 {number_of_messages_in_current_chat=}")   
+
             if number_of_messages_in_current_chat == 0:
                 # If we have not had any interaction on the active chat just remove it
-                self.chat_history_manager.delete_chat_history_item(active_chat['chat_id'])
+                logger.debug("FM1")
+                self.chat_history_manager.delete_chat_history_item(ChatHistoryItem(**active_chat))
+                logger.debug("FM2")
         
         new_chat = self.chat_history_manager.create_chat_history_item(chat_history_item)
-        logger.debug(f"EXITING create_new_chat with={new_chat}")
+        logger.debug(f" with={new_chat}")
         return new_chat
     
-
+    @trace(logger)
     def get_chat_interactions_count(self, chat_id):
-        logger.debug(f"ENTERING get_chat_interactions_count with={chat_id}")
         interactions_count = 0
         with SqliteSaver.from_conn_string(self._db_path) as checkpointer:            
             config = {"configurable": {"thread_id": chat_id}}
@@ -128,7 +137,6 @@ class UserSession:
                 values = last_interaction.values  
                 if 'messages' in values:
                     interactions_count = len(values['messages'])
-        logger.debug(f"EXITING get_chat_interactions_count with={interactions_count}")
         return interactions_count
             
 

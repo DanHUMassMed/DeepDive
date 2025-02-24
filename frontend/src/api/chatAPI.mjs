@@ -87,10 +87,11 @@ export const cancelActiveChat = async (closeWebSocket) => {
         }
 };
 
-export const deleteChatHistoryItem = async (chat_id) => {
+export const deleteChatHistoryItem = async (projectId, chatId) => {
   try {
     const response = await axios.delete(
-      `http://localhost:8000/delete/chat-history-item/${chat_id}`,
+      `http://localhost:8000/delete/chat-history-item`,
+      { project_id: projectId, chat_id: chatId}, 
       { headers: { 'Content-Type': 'application/json' } }
     );
     console.log('Type of response.data:', typeof response.data);
@@ -102,11 +103,13 @@ export const deleteChatHistoryItem = async (chat_id) => {
 };
 
 
-export const renameChat = async (chatId, chatName) => {
+export const renameChat = async (projectId, chatId, chatName) => {
   try {
-    const response = await axios.put(
-      `http://localhost:8000/update/chat-history-item-title/${chatId}`,
-      { name: chatName }, // Send 'name' in the request body
+    const response = await axios.post(
+      `http://localhost:8000/update/chat-history-item-title`,
+      { project_id: projectId,
+        chat_id: chatId,
+        chat_title: chatName }, // Send 'name' in the request body
       { headers: { 'Content-Type': 'application/json' } }
     );
     console.log('Updated item:', response.data);

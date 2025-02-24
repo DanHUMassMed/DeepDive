@@ -6,5 +6,7 @@
     "python.testing.pytestEnabled": true,
     "terminal.integrated.env.osx": {
         "PYTHONPATH": "/Users/dan/Code/LLM/DeepDive/backend"
-    }
+    },
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000
 }

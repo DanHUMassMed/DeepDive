@@ -3,7 +3,7 @@ import { MdOutlineDriveFileRenameOutline } from "react-icons/md";
 import { FiShare } from "react-icons/fi";
 import { RiDeleteBinLine } from "react-icons/ri";
 import { Tooltip } from 'react-tooltip';
-import { renameChat, getChatHistoryTimestamp, deleteChatHistoryItem } from "../api/chatAPI"
+import { renameChat, getChatHistoryTimestamp, deleteChatHistoryItem } from "../api/chatAPI.mjs"
 import ConfigContext from './ConfigContext';
 
 

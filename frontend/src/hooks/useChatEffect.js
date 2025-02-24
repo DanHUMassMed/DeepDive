@@ -1,6 +1,6 @@
 import { useEffect, useRef, useContext } from 'react';
 import ConfigContext from '../components/ConfigContext';
-import { getActiveChat } from "../api/chatAPI"
+import { getActiveChat } from "../api/chatAPI.mjs"
 
 const useChatEffect = (messageToSend, setChatMessage) => {
   const { config, setConfig  } = useContext(ConfigContext);

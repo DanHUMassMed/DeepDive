@@ -2,7 +2,7 @@ import React, { useRef, useState, useContext, useEffect } from 'react';
 import ConfigContext from './ConfigContext';
 import ChatHistoryItem from './ChatHistoryItem';
 import { IoIosSearch } from 'react-icons/io';
-import { getChatHistory } from "../api/chatAPI"
+import { getChatHistory } from "../api/chatAPI.mjs"
 
 const LeftNav = () => {
   const { config, setConfig  } = useContext(ConfigContext);
