@@ -6,7 +6,7 @@ from typing import List, Optional
 
 from app import constants
 from app.base_manager import BaseManager
-from app.utils.utilities import setup_logging,trace
+from app.utils.utilities import setup_logging, trace
 from pydantic.dataclasses import dataclass
 
 logger = setup_logging()
@@ -124,9 +124,13 @@ class ChatHistoryManager(BaseManager):
 
     @trace(logger)
     def set_active_chat(self, chat_history_item: ChatHistoryItem):
+        logger.debug(f"FME")
         """Set the active chat for the user related to the given chat_id."""
         chat_history_items = self.get_chat_history(chat_history_item.project_id)
+        logger.debug(f"{chat_history_items=}")
         for item in chat_history_items:
+            logger.debug(f"{item}")
+            if item['chat_id'] == chat_history_item.chat_id:
                 item['active_chat'] = True
                 self._set_active_chat(chat_history_items, chat_history_item.chat_id)
                 # Save the updated chat_history_items

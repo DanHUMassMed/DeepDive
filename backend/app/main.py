@@ -157,6 +157,19 @@ def create_chat_history_item(chat_history_item: ChatHistoryItem):
     logger.trace(f"EXITING  {__name__} {inspect.currentframe().f_code.co_name}")
     return new_chat
 
+@app.get("/get/chat-items/{project_id}/{chat_id}")
+def get_chat_items(project_id: str, chat_id: str):
+    logger.trace(f"ENTERING  {__name__} {inspect.currentframe().f_code.co_name}")
+    logger.debug(f"params {project_id=} {chat_id=}")
+    active_session = session_manager.get_session(project_id)
+    chat_interactions = active_session.get_chat_interactions(chat_id)
+    chat_history_manager = ChatHistoryManager.singleton()
+    chat_history_manager.set_active_chat(ChatHistoryItem(project_id=project_id, chat_id=chat_id))
+    #update timestamp
+    logger.trace(f"EXITING  {__name__} {inspect.currentframe().f_code.co_name}")
+    return chat_interactions
+
+
 #PASSED
 @app.post("/update/chat-history-item-title")
 async def update_chat_history_item_title(chat_history_item: ChatHistoryItem):

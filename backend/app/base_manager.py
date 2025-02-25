@@ -30,7 +30,6 @@ class BaseManager:
 
     def _get_parent_directory(self):
         directory = os.path.dirname(__file__)
-        logger.debug(f"_get_parent_directory {__file__}")
         parent_directory = os.path.dirname(directory)
         return parent_directory
 

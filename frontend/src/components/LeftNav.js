@@ -4,7 +4,7 @@ import ChatHistoryItem from './ChatHistoryItem';
 import { IoIosSearch } from 'react-icons/io';
 import { getChatHistory } from "../api/chatAPI.mjs"
 
-const LeftNav = () => {
+const LeftNav = ( { setChatMessages } ) => {
   const { config, setConfig  } = useContext(ConfigContext);
   const [chatHistory, setChatHistory] = useState([]);
 
@@ -36,7 +36,7 @@ const LeftNav = () => {
       <SearchBar />
       <div className="p-2 max-h-[calc(100vh-64px)] overflow-y-auto">
         {chatHistory.map((chat) => (
-          <ChatHistoryItem key={chat.chat_id} chat={chat} />
+          <ChatHistoryItem   key={chat.chat_id}  setChatMessages={setChatMessages} chat={chat} />
         ))}
       </div>
     </div>

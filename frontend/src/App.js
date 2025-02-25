@@ -8,14 +8,15 @@ import { ConfigProvider, useConfig } from './components/ConfigContext';
 
 
 function App() {
+  const [chatMessages, setChatMessages] = useState([]);  
 
   return (
     <div className="flex h-screen flex-col">
       <ConfigProvider>
       <TopNav />
       <div className="flex flex-grow">
-        <LeftNav/>
-        <DialogContainer />
+        <LeftNav setChatMessages={setChatMessages}/>
+        <DialogContainer chatMessages={chatMessages} setChatMessages={setChatMessages}/>
         <RightNav /> 
       </div>
       </ConfigProvider>

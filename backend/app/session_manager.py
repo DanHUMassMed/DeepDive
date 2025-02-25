@@ -49,17 +49,11 @@ class SessionManager:
 class UserSession:
     @trace(logger)
     def __init__(self, project_id):
-        logger.debug(f"IN1")   
         self._db_path = f"{get_parent_directory()}/resources/checkpoints.db"
-        logger.debug(f"IN2")   
         self._model = init_chat_model("llama3.2:1b", model_provider="ollama")
-        logger.debug(f"IN3")   
         self.project_id = project_id
-        logger.debug(f"IN4")   
         self.chat_history_manager = ChatHistoryManager.singleton()
-        logger.debug(f"IN5")   
         active_chat = self.chat_history_manager.get_active_chat(self.project_id)
-        logger.debug(f"IN active_chat={active_chat}")    
         if active_chat is None:
             logger.debug(f"IN before create_chat_history_item")  
             chat_item = ChatHistoryItem(project_id=self.project_id)
@@ -138,7 +132,26 @@ class UserSession:
                 if 'messages' in values:
                     interactions_count = len(values['messages'])
         return interactions_count
-            
+    
+    @trace(logger)           
+    def get_chat_interactions(self, chat_id):
+        interactions=[]
+        with SqliteSaver.from_conn_string(self._db_path) as checkpointer:            
+            config = {"configurable": {"thread_id": chat_id}}
+            compiled_graph = self.graph.compile(checkpointer=checkpointer)
+            state_history = compiled_graph.get_state_history(config) 
+            last_interaction = next(state_history, None)
+            if last_interaction:
+                values = last_interaction.values  
+                if 'messages' in values:
+                    for message in values['messages']:
+                        #print(type(message))
+                        #print(message.content)
+                        interaction_type = 'user' if isinstance(message,HumanMessage) else 'ai'
+                        interaction = {'type':interaction_type, 'content':message.content}
+                        interactions.append(interaction)
+        return interactions
+
 
     async def stream_llm(self, websocket: WebSocket, prompt: str):
         input_messages = [HumanMessage(prompt)]

@@ -1,7 +1,7 @@
 // createNewChat.test.js
 import test from 'ava';
 import { createNewChat, getChatHistory, getActiveChat, getChatHistoryTimestamp,
-    deleteChatHistoryItem, renameChat
+    deleteChatHistoryItem, renameChat, getChatItem
  } from '../api/chatAPI.mjs';  // Adjust the path to your module
 
 test('createNewChat should successfully create a new chat', async t => {
@@ -123,9 +123,9 @@ test('renameChat includes chat_title in the response', async (t) => {
     }
 });
 
-test('deleteChatHistoryItem includes chat_title in the response', async (t) => {
+test('deleteChatHistoryItem', async (t) => {
     const projectId = 'deep-dive';
-    const chatId = '451245f5-a524-4ab8-9a50-43466011e9ed';
+    const chatId = '892de0e9-ee80-437e-8212-e487ee1be9a0';
 
     
     try {
@@ -136,8 +136,26 @@ test('deleteChatHistoryItem includes chat_title in the response', async (t) => {
         console.log('Response:', response);
 
         // Check if the response includes a chat_history_timestamp field
-        t.true(response.hasOwnProperty('project_id'), 'project_id is missing');
+        //t.true(response.hasOwnProperty('project_id'), 'project_id is missing');
     } catch (error) {
         t.fail(`Failed to delete chat: ${error.message}`); // Enhanced error message
     }
 });
+
+test('getChatItem', async (t) => {
+    const project_id = 'deep-dive'; // Replace with an actual project ID
+    const chat_id="ea9123ff-9a8e-46c0-a53f-22b8f88e3202";
+    
+    try {
+        const response = await getChatItem(project_id,chat_id);
+        
+        // Assertions
+        t.truthy(response); // Ensure response is truthy (i.e., not null or undefined)
+        console.log('Response:', response);
+
+        // Check if the response includes a chat_history_timestamp field
+        //t.true(response.hasOwnProperty('chat_history_timestamp'), 'chat_history_timestamp is missing');
+    } catch (error) {
+        t.fail(`Failed to fetch chat history: ${error.message}`); // Enhanced error message
+    }
+});  

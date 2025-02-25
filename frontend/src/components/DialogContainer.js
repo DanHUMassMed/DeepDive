@@ -13,11 +13,10 @@ import { cancelActiveChat } from '../api/chatAPI.mjs';
 
 
 // DialogContainer Component - Main container for the chat UI
-const DialogContainer = () => {
+const DialogContainer = ({ chatMessages, setChatMessages }) => {
   const { config, setConfig  } = useContext(ConfigContext);
 
   const textareaRef = useRef(null);
-  const [chatMessages, setChatMessages] = useState([]);  
   const [messageToSend, setMessageToSend] = useState('');
   
   // Use the custom hook

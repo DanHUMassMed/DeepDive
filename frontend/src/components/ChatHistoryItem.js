@@ -3,13 +3,13 @@ import { MdOutlineDriveFileRenameOutline } from "react-icons/md";
 import { FiShare } from "react-icons/fi";
 import { RiDeleteBinLine } from "react-icons/ri";
 import { Tooltip } from 'react-tooltip';
-import { renameChat, getChatHistoryTimestamp, deleteChatHistoryItem } from "../api/chatAPI.mjs"
+import { renameChat, getChatHistoryTimestamp, deleteChatHistoryItem, getChatItems } from "../api/chatAPI.mjs"
 import ConfigContext from './ConfigContext';
 
 
-const ChatHistoryItem = ({ chat }) => {
+const ChatHistoryItem = ({ setChatMessages, chat }) => {
   const { config, setConfig  } = useContext(ConfigContext);
-  const { chat_id, chat_title, chat_llm_name, chat_start_date, active_chat } = chat;
+  const { project_id, chat_id, chat_title, chat_llm_name, chat_start_date, active_chat } = chat;
   const [showMenu, setShowMenu] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState(null); // Holds the type of modal (rename, share, delete)
@@ -20,7 +20,28 @@ const ChatHistoryItem = ({ chat }) => {
 
   const handleClick = () => {
     console.log(`Bringing back chat: ${chat_title}`);
-    // Implement logic to restore the chat here
+    getChatItems(project_id, chat_id, newName)
+    .then((chatItem) => {
+      // Handle the updated chat item here
+      console.log('Updated chat item:', chatItem);
+      setChatMessages(chatItem);
+
+      return getChatHistoryTimestamp(config.project_id); // Return the promise from getChatHistoryTimestamp
+    })
+    .then((chatHistoryTimestamp) => {
+      // Handle the result of getChatHistoryTimestamp
+      setConfig((prevConfig) => ({
+        ...prevConfig,
+        chat_history_timestamp: chatHistoryTimestamp,
+      }));
+      handleModalClose();
+    })
+    .catch((error) => {
+      // Handle any errors that occurred during the rename operation
+      console.error('Error renaming chat:', error);
+      // Optionally, handle the error (e.g., show a notification to the user)
+    });
+
   };
 
   const handleEllipsisClick = (e) => {
@@ -63,7 +84,7 @@ const ChatHistoryItem = ({ chat }) => {
 
   const handleRename = () => {
     console.log(`Renaming chat to: ${newName}`);
-    renameChat(chat_id, newName)
+    renameChat(project_id, chat_id, newName)
       .then((chatItem) => {
         // Handle the updated chat item here
         console.log('Updated chat item:', chatItem);
@@ -86,7 +107,7 @@ const ChatHistoryItem = ({ chat }) => {
 
   const handleDelete = () => {
     console.log(`Deleting chat: ${chat_title}`);
-    deleteChatHistoryItem(chat_id)
+    deleteChatHistoryItem(project_id, chat_id)
     .then((returnStatus) => {
       // Handle the updated chat item here
       //TODO manage returnStatus {'status':'FAIL'}
