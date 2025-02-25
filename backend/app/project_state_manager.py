@@ -84,6 +84,7 @@ class ProjectStateManager(BaseManager):
             updated_fields['project_system_prompt'] = project_state_item.project_system_prompt
             
         self._update('project_id', project_state_item.project_name, updated_fields)
+        return {'status':'SUCCESS'}
                
 
     def get_chat_history_timestamp(self, project_id):

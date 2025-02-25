@@ -4,7 +4,7 @@ import inspect
 import requests
 from app.session_manager import SessionManager
 from app.chat_history_manager import ChatHistoryItem, ChatHistoryManager
-from app.project_state_manager import ProjectStateManager
+from app.project_state_manager import ProjectStateItem, ProjectStateManager
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -164,6 +164,7 @@ def get_chat_items(project_id: str, chat_id: str):
     active_session = session_manager.get_session(project_id)
     chat_interactions = active_session.get_chat_interactions(chat_id)
     chat_history_manager = ChatHistoryManager.singleton()
+    #TODO WHY IS THIS A SET OPERATION set_active_chat?
     chat_history_manager.set_active_chat(ChatHistoryItem(project_id=project_id, chat_id=chat_id))
     #update timestamp
     logger.trace(f"EXITING  {__name__} {inspect.currentframe().f_code.co_name}")
@@ -182,3 +183,22 @@ async def update_chat_history_item_title(chat_history_item: ChatHistoryItem):
         raise HTTPException(status_code=404, detail="Chat history item not found")
     logger.trace(f"EXITING {__name__} {inspect.currentframe().f_code.co_name}")
     return updated_history
+
+@app.get("/get/project-state/{project_id}")
+def get_project_state(project_id: str):
+    logger.trace(f"ENTERING  {__name__} {inspect.currentframe().f_code.co_name}")
+    logger.debug(f"params {project_id=}")
+    project_state_manager = ProjectStateManager.singleton()
+    project_state = project_state_manager.get_project_state(project_id)
+    logger.trace(f"EXITING  {__name__} {inspect.currentframe().f_code.co_name}")
+    return project_state
+
+#PASSED
+@app.post("/update/project-state")
+async def update_project_state(project_state_item: ProjectStateItem):
+    logger.trace(f"ENTERING {__name__} {inspect.currentframe().f_code.co_name}")
+    logger.debug(f"Params {project_state_item=}")
+    project_state_manager = ProjectStateManager.singleton()
+    return_status = project_state_manager.update_project_state(project_state_item)
+    logger.trace(f"EXITING {__name__} {inspect.currentframe().f_code.co_name}")
+    return return_status

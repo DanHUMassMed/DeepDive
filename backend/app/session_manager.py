@@ -1,6 +1,7 @@
 import asyncio
 import os
 from app.chat_history_manager import ChatHistoryItem, ChatHistoryManager
+from app.project_state_manager import ProjectStateManager, ProjectStateItem
 from fastapi import WebSocket
 from fastapi.websockets import WebSocketState
 from langchain.chat_models import init_chat_model
@@ -50,7 +51,6 @@ class UserSession:
     @trace(logger)
     def __init__(self, project_id):
         self._db_path = f"{get_parent_directory()}/resources/checkpoints.db"
-        self._model = init_chat_model("llama3.2:1b", model_provider="ollama")
         self.project_id = project_id
         self.chat_history_manager = ChatHistoryManager.singleton()
         active_chat = self.chat_history_manager.get_active_chat(self.project_id)
@@ -60,18 +60,22 @@ class UserSession:
             self.chat_history_manager.create_chat_history_item(chat_item)
             logger.debug(f"IN after create_chat_history_item")   
         
-
         self.system_prompt = constants.DEFAULT_SYSTEM_PROMPT
         self.graph = self._create_graph()
         
-    @trace(logger)    
+    @trace(logger)
     def _create_graph(self):
         logger.trace(f"ENTERING  {__name__} {inspect.currentframe().f_code.co_name}")    
+
+        project_state_manager = ProjectStateManager.singleton()
+        project_state = project_state_manager.get_project_state(self.project_id)
+        model = init_chat_model(project_state['project_llm_name'], model_provider="ollama")
+
         #TODO THIS DOES NOT LOOK RIGHT    
         trimmer = trim_messages(
             max_tokens=6_500_000,
             strategy="last",
-            token_counter=self._model,
+            token_counter=model,
             include_system=True,
             allow_partial=False,
             start_on="human",
@@ -92,7 +96,7 @@ class UserSession:
         def call_model(state: MessagesState):
             trimmed_messages = trimmer.invoke(state["messages"])
             prompt = prompt_template.invoke({"messages": trimmed_messages})
-            response = self._model.invoke(prompt)
+            response = model.invoke(prompt)
             return {"messages": [response]}
 
         graph.add_edge(START, "model")

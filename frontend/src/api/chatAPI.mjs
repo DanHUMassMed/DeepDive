@@ -127,7 +127,7 @@ export const renameChat = async (projectId, chatId, chatName) => {
   }
 };
 
-export const getChatItems = async (project_id,chat_id) => {
+export const getChatItems = async (project_id, chat_id) => {
   try {
     const response = await axios.get(
         `http://127.0.0.1:8000/get/chat-items/${project_id}/${chat_id}`,  
@@ -149,3 +149,67 @@ export const getChatItems = async (project_id,chat_id) => {
     throw new Error('Failed to fetch chat history');
   }
 };
+
+export const getAvailableModels = async () => {
+  try {
+    const response = await axios.get(
+        `http://127.0.0.1:8000/get/available-models`,  
+        { headers: { 'Content-Type': 'application/json' } }
+    );
+    
+    // Log the entire response to check the structure
+    console.log('Response data:', response.data);
+
+    // Check if 'response' key exists before accessing it
+    if (response.data && response.data['response']) {
+      console.log('getAvailableModels Response:', response.data['response'].toString());
+    }
+
+    return response.data;
+    
+  } catch (error) {
+    console.error('Error on getAvailableModels:', error);
+    throw new Error('Failed to getAvailableModels');
+  }
+};
+
+export const getProjectState = async (projectId) => {
+  try {
+    const response = await axios.get(
+        `http://127.0.0.1:8000/get/project-state/${projectId}`,  
+        { headers: { 'Content-Type': 'application/json' } }
+    );
+    
+    // Log the entire response to check the structure
+    console.log('Response data:', response.data);
+
+    // Check if 'response' key exists before accessing it
+    if (response.data && response.data['response']) {
+      console.log('getProjectState Response:', response.data['response'].toString());
+    }
+
+    return response.data;
+    
+  } catch (error) {
+    console.error('Error on getProjectState:', error);
+    throw new Error('Failed to getProjectState');
+  }
+};
+
+export const updateProjectState = async (projectName, projectLLMName, projectSystemPrompt) => {
+  try {
+    const response = await axios.post(
+      `http://localhost:8000/update/project-state`,
+      { project_name: projectName,
+        project_llm_name: projectLLMName,
+        project_system_prompt: projectSystemPrompt }, 
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+    console.log('Updated item:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error updateProjectState:', error);
+    throw new Error('Failed to updateProjectState');
+  }
+};
+

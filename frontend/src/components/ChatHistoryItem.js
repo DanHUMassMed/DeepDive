@@ -20,10 +20,10 @@ const ChatHistoryItem = ({ setChatMessages, chat }) => {
 
   const handleClick = () => {
     console.log(`Bringing back chat: ${chat_title}`);
-    getChatItems(project_id, chat_id, newName)
+    getChatItems(project_id, chat_id)
     .then((chatItem) => {
       // Handle the updated chat item here
-      console.log('Updated chat item:', chatItem);
+      console.log('Updated chat items:', chatItem);
       setChatMessages(chatItem);
 
       return getChatHistoryTimestamp(config.project_id); // Return the promise from getChatHistoryTimestamp

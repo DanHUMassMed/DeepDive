@@ -1,7 +1,7 @@
 // createNewChat.test.js
 import test from 'ava';
 import { createNewChat, getChatHistory, getActiveChat, getChatHistoryTimestamp,
-    deleteChatHistoryItem, renameChat, getChatItem
+    deleteChatHistoryItem, renameChat, getChatItems, getAvailableModels, getProjectState, updateProjectState
  } from '../api/chatAPI.mjs';  // Adjust the path to your module
 
 test('createNewChat should successfully create a new chat', async t => {
@@ -142,12 +142,12 @@ test('deleteChatHistoryItem', async (t) => {
     }
 });
 
-test('getChatItem', async (t) => {
+test('getChatItems', async (t) => {
     const project_id = 'deep-dive'; // Replace with an actual project ID
     const chat_id="ea9123ff-9a8e-46c0-a53f-22b8f88e3202";
     
     try {
-        const response = await getChatItem(project_id,chat_id);
+        const response = await getChatItems(project_id,chat_id);
         
         // Assertions
         t.truthy(response); // Ensure response is truthy (i.e., not null or undefined)
@@ -159,3 +159,52 @@ test('getChatItem', async (t) => {
         t.fail(`Failed to fetch chat history: ${error.message}`); // Enhanced error message
     }
 });  
+
+test('getAvailableModels', async (t) => {
+    try {
+        const response = await getAvailableModels();
+        
+        // Assertions
+        t.truthy(response); // Ensure response is truthy (i.e., not null or undefined)
+        console.log('Response:', response);
+
+        // Check if the response includes a chat_history_timestamp field
+        //t.true(response.hasOwnProperty('chat_history_timestamp'), 'chat_history_timestamp is missing');
+    } catch (error) {
+        t.fail(`Failed to fetch chat history: ${error.message}`); // Enhanced error message
+    }
+});  
+
+test('getProjectState', async (t) => {
+    const project_id = 'deep-dive'; // Replace with an actual project ID
+    try {
+        const response = await getProjectState(project_id);
+        
+        // Assertions
+        t.truthy(response); // Ensure response is truthy (i.e., not null or undefined)
+        console.log('Response:', response);
+
+        // Check if the response includes a chat_history_timestamp field
+        //t.true(response.hasOwnProperty('chat_history_timestamp'), 'chat_history_timestamp is missing');
+    } catch (error) {
+        t.fail(`Failed to fetch chat history: ${error.message}`); // Enhanced error message
+    }
+});
+
+test('updateProjectState', async (t) => {
+    const project_id = 'my-second-project'; // Replace with an actual project ID
+    const llm_name = 'test llm!';
+    const system_prompt = 'Do well!'
+    try {
+        const response = await updateProjectState(project_id,llm_name,system_prompt);
+        
+        // Assertions
+        t.truthy(response); // Ensure response is truthy (i.e., not null or undefined)
+        console.log('Response:', response);
+
+        // Check if the response includes a chat_history_timestamp field
+        //t.true(response.hasOwnProperty('chat_history_timestamp'), 'chat_history_timestamp is missing');
+    } catch (error) {
+        t.fail(`Failed to fetch chat history: ${error.message}`); // Enhanced error message
+    }
+});

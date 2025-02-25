@@ -6,6 +6,7 @@ from typing import List, Optional
 
 from app import constants
 from app.base_manager import BaseManager
+from app.project_state_manager import ProjectStateManager
 from app.utils.utilities import setup_logging, trace
 from pydantic.dataclasses import dataclass
 
@@ -59,8 +60,10 @@ class ChatHistoryManager(BaseManager):
             chat_history_item.chat_title = f"Chat on {chat_history_item.chat_start_date}"
 
         # Set chat_llm_name if it is not provided or blank
-        if not chat_history_item.chat_llm_name:
-            chat_history_item.chat_llm_name = constants.DEFAULT_LLM
+        project_state_manager = ProjectStateManager.singleton()
+        project_state = project_state_manager.get_project_state(chat_history_item.project_id)
+        chat_history_item.chat_llm_name = project_state['project_llm_name']
+        
 
         # Set this as the active_chat
         chat_history_item.active_chat = True

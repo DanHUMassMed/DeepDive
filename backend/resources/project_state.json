@@ -13,8 +13,8 @@
         "project_name": "my-second-project",
         "project_start_date": "2025-02-24 10:13:31 AM",
         "chat_history_timestamp": "2025-02-24 10:13:31.090",
-        "project_llm_name": "llama3.2:1b",
-        "project_system_prompt": "Answer all questions to the best of your ability. ",
+        "project_llm_name": "test llm!",
+        "project_system_prompt": "Do well!",
         "chat_history_items": []
     },
     {
@@ -30,10 +30,18 @@
         "project_id": "deep-dive",
         "project_name": "deep-dive",
         "project_start_date": "2025-02-24 10:13:05 AM",
-        "chat_history_timestamp": "2025-02-25 07:28:01.649",
-        "project_llm_name": "my_better_llm",
+        "chat_history_timestamp": "2025-02-25 11:05:30.801",
+        "project_llm_name": "deepseek-r1:32b",
         "project_system_prompt": "Answer all questions to the best of your ability. ",
         "chat_history_items": [
+            {
+                "project_id": "deep-dive",
+                "chat_id": "5c7f6b23-036a-4a55-a10a-e4b7ce792590",
+                "chat_start_date": "2025-02-25 11:05:13 AM",
+                "chat_title": "Chat on 2025-02-25 11:05:13 AM",
+                "chat_llm_name": "deepseek-r1:32b",
+                "active_chat": false
+            },
             {
                 "project_id": "deep-dive",
                 "chat_id": "4b310c6a-c05f-4c8c-adcd-f1e59e834386",
