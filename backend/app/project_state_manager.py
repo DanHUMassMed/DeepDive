@@ -17,6 +17,8 @@ class ProjectStateItem:
     project_name: str
     project_llm_name: Optional[str] = None
     project_system_prompt: Optional[str] = None
+    project_data_dir: Optional[str] = None
+    project_data_toggle: Optional[bool] = False
 
 
 
@@ -24,7 +26,7 @@ class ProjectStateManager(BaseManager):
     
     def get_project_state(self, project_id):
         """Return a project state item for the given project_id."""
-        return_fields=['project_name', 'project_start_date', 'project_llm_name', 'project_system_prompt']
+        return_fields=['project_name', 'project_start_date', 'project_llm_name', 'project_system_prompt', 'project_data_dir', 'project_data_toggle']
         return self._search('project_id', project_id, return_fields)
 
     def delete_project_state(self, project_id):
@@ -57,6 +59,11 @@ class ProjectStateManager(BaseManager):
         else:
             project_state_to_create['project_system_prompt'] = constants.DEFAULT_SYSTEM_PROMPT
 
+        if project_state_item.project_data_dir:
+            project_state_to_create['project_data_dir'] = project_state_item.project_data_dir
+
+        project_state_to_create['project_data_toggle'] = project_state_item.project_data_toggle
+        
         project_state_to_create['chat_history_items'] = []
         
         # Add the new project state item to the data
@@ -82,7 +89,12 @@ class ProjectStateManager(BaseManager):
         # Set project_system_prompt if it is provided
         if project_state_item.project_system_prompt:
             updated_fields['project_system_prompt'] = project_state_item.project_system_prompt
-            
+        
+        if project_state_item.project_data_dir:
+            updated_fields['project_data_dir'] = project_state_item.project_data_dir
+
+        updated_fields['project_data_toggle'] = project_state_item.project_data_toggle
+    
         self._update('project_id', project_state_item.project_name, updated_fields)
         return {'status':'SUCCESS'}
                

@@ -46,6 +46,25 @@ const TopNav = () => {
         <HiOutlinePencilSquare size={24} color="black" />
       </button>
       
+      {/* Centered fields */}
+      <div className="flex space-x-2 justify-center items-center">
+      <label className="font-semibold mr-2">Project:</label>
+        <input
+          type="text"
+          value={`Deep-Dive`}
+          readOnly
+          className="bg-gray-100 border border-gray-300 text-center p-1 rounded"
+          style={{ width: '200px' }}
+        />
+        <label className="font-semibold mr-2">Started on:</label>
+        <input
+          type="text"
+          value={`2025-02-24 10:13:05 AM`}
+          readOnly
+          className="bg-gray-100 border border-gray-300 text-center p-1 rounded"
+          style={{ width: '300px' }}
+        />
+      </div>
 
       {/* Sidebar buttons on the right */}
       <div className="flex space-x-2">

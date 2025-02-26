@@ -1,18 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Tooltip } from 'react-tooltip';
 
-const SystemPrompt = () => {
-  const [llmRole, setLlmRole] = useState('');
-
+const SystemPrompt = ({ llmRole, setLlmRole }) => {
   const handleChange = (event) => {
     setLlmRole(event.target.value);
-  };
-
-  const handleSave = () => {
-    // Implement your save logic here
-    console.log('Saved:', llmRole);
-    // Optionally, you can clear the input after saving
-    // setLlmRole('');
   };
 
   const tooltipStyles = {
@@ -45,12 +36,6 @@ const SystemPrompt = () => {
         className="w-full p-2 border border-gray-300 rounded-md"
         placeholder="Describe the LLM's role here..."
       />
-      <button
-        onClick={handleSave}
-        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-      >
-        Save
-      </button>
       <Tooltip
         id="llmRoleTooltip"
         place="top"

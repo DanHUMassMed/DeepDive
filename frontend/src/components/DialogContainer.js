@@ -149,7 +149,9 @@ const AIDialog = ({ interaction }) => {
 // ChatPrompt Component - Textarea for user input
 function ChatPrompt({ textareaRef, handleSendPrompt, handleStopMessage }) {
   const { config, setConfig  } = useContext(ConfigContext);
-  
+  const [isSearchEnabled, setIsSearchEnabled] = useState(false);
+  const [isReasonEnabled, setIsReasonEnabled] = useState(false);
+
   const handleOnChangePrompt = () => {
     const textarea = textareaRef.current;
     textarea.style.height = 'auto'; // Reset height to auto before resizing
@@ -157,6 +159,16 @@ function ChatPrompt({ textareaRef, handleSendPrompt, handleStopMessage }) {
     setConfig((prevConfig) => ({...prevConfig, isPromptTextEntered: (textarea.value.trim().length > 0)}));
   };
 
+    // Toggle search button
+    const toggleSearch = () => {
+      setIsSearchEnabled(!isSearchEnabled);
+    };
+  
+    // Toggle reason button
+    const toggleReason = () => {
+      setIsReasonEnabled(!isReasonEnabled);
+    };
+  
   return (
     <div className="flex flex-col w-full">
       <textarea
@@ -168,21 +180,27 @@ function ChatPrompt({ textareaRef, handleSendPrompt, handleStopMessage }) {
         onChange={handleOnChangePrompt}
       />
 
-      <div className="flex items-center justify-between w-full mt-2"> 
+      <div className="flex items-center justify-between w-full mt-2">
         {/* Left-aligned buttons */}
         <div className="flex space-x-4">
-          <button className="flex items-center space-x-2">
-            <CiGlobe size={24}/>
-            <span>Search</span>
+          <button
+            onClick={toggleSearch}
+            className={`flex items-center space-x-2 ${isSearchEnabled ? 'text-blue-500' : 'text-gray-500'}`}
+          >
+            <CiGlobe size={24} />
+            <span>{isSearchEnabled ? 'Search On' : 'Search'}</span>
           </button>
-          <button className="flex items-center space-x-2">
-            <IoBulbOutline size={24}/>
-            <span>Reason</span>
+          <button
+            onClick={toggleReason}
+            className={`flex items-center space-x-2 ${isReasonEnabled ? 'text-blue-500' : 'text-gray-500'}`}
+          >
+            <IoBulbOutline size={24} />
+            <span>{isReasonEnabled ? 'Reason On' : 'Reason'}</span>
           </button>
         </div>
 
         {/* Right-aligned button */}
-        <ChatPromptButton handleStopMessage={handleStopMessage}/>
+        <ChatPromptButton handleStopMessage={handleStopMessage} />
       </div>
     </div>
   );

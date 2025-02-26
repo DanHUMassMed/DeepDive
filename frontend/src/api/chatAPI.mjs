@@ -196,13 +196,11 @@ export const getProjectState = async (projectId) => {
   }
 };
 
-export const updateProjectState = async (projectName, projectLLMName, projectSystemPrompt) => {
+export const updateProjectState = async (projectData) => {
   try {
     const response = await axios.post(
       `http://localhost:8000/update/project-state`,
-      { project_name: projectName,
-        project_llm_name: projectLLMName,
-        project_system_prompt: projectSystemPrompt }, 
+      projectData, // Pass the dictionary directly here
       { headers: { 'Content-Type': 'application/json' } }
     );
     console.log('Updated item:', response.data);
@@ -212,4 +210,3 @@ export const updateProjectState = async (projectName, projectLLMName, projectSys
     throw new Error('Failed to updateProjectState');
   }
 };
-

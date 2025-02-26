@@ -61,6 +61,7 @@ class UserSession:
             logger.debug(f"IN after create_chat_history_item")   
         
         self.system_prompt = constants.DEFAULT_SYSTEM_PROMPT
+        #TODO FIX THIS
         self.graph = self._create_graph()
         
     @trace(logger)

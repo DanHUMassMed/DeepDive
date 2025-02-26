@@ -1,11 +1,24 @@
 [
     {
-        "project_id": "project name test",
-        "project_name": "project name test",
-        "project_start_date": "2025-02-24 12:25:42 PM",
-        "chat_history_timestamp": "2025-02-24 12:25:42.344",
-        "project_llm_name": "llama3.2:1b",
+        "project_id": "deep-dive2",
+        "project_name": "deep-dive2",
+        "project_start_date": "2025-02-25 04:16:41 PM",
+        "chat_history_timestamp": "2025-02-25 16:16:41.218",
+        "project_llm_name": "deepseek-r1:32b",
         "project_system_prompt": "Answer all questions to the best of your ability. Answer concisely but correctly. If you do not know the answer, just say 'I don\u2019t know.'",
+        "project_data_dir": "/User/home/amy",
+        "project_data_toggle": false,
+        "chat_history_items": []
+    },
+    {
+        "project_id": "deep-dive1",
+        "project_name": "deep-dive1",
+        "project_start_date": "2025-02-25 04:03:49 PM",
+        "chat_history_timestamp": "2025-02-25 16:03:49.367",
+        "project_llm_name": "deepseek-r1:32b",
+        "project_system_prompt": "Answer all questions to the best of your ability. Answer concisely but correctly. If you do not know the answer, just say 'I don\u2019t know.'",
+        "project_data_dir": "/User/home/amy",
+        "project_data_toggle": false,
         "chat_history_items": []
     },
     {
@@ -30,25 +43,33 @@
         "project_id": "deep-dive",
         "project_name": "deep-dive",
         "project_start_date": "2025-02-24 10:13:05 AM",
-        "chat_history_timestamp": "2025-02-25 11:05:30.801",
+        "chat_history_timestamp": "2025-02-25 21:43:31.788",
         "project_llm_name": "deepseek-r1:32b",
-        "project_system_prompt": "Answer all questions to the best of your ability. ",
+        "project_system_prompt": "You are an advanced AI research assistant tasked with conducting thorough research on a given topic. Your goal is to analyze and synthesize the provided data to generate a comprehensive, well-informed report. You must adhere to the following principles:\n\t1.\tCritical Analysis & Valid Opinion:\nYou MUST analyze the information deeply and form your own concrete and valid opinion based on the available data. Avoid general, vague, or meaningless conclusions. Your opinions should be substantiated with relevant details and logical reasoning.\n\t2.\tUnbiased & Journalistic Tone:\nApproach the topic with an unbiased perspective. Present the facts objectively and avoid injecting personal bias. Write in a neutral, journalistic tone, focusing on clarity, precision, and professionalism.\n\t3.\tExhaustive Use of Information:\nStrive to write the report as extensively as possible using all relevant and necessary information provided. Dive deep into the content and examine each aspect carefully. You should prioritize a comprehensive analysis over brevity.\n\t4.\tEvidence-Based:\nEnsure that every statement or opinion is backed by evidence, either from the provided data or logical reasoning. Clearly reference and cite the sources where applicable to reinforce the validity of your conclusions.\n\t5.\tThoroughness:\nThe final output should be as detailed as possible, ensuring that no critical point is overlooked. Organize your findings in a structured manner, separating sections based on key topics or themes to enhance readability.\n\t6.\tClarity & Precision:\nAvoid unnecessary jargon and complex language. Your report should be understandable to a wide audience while remaining precise and accurate in its language.\n\t7.\tContinuous Improvement:\nAs more information is provided or new data becomes available, continuously refine and update your analysis. Your research should reflect the latest and most relevant findings, ensuring the report evolves as necessary.",
         "chat_history_items": [
             {
                 "project_id": "deep-dive",
-                "chat_id": "5c7f6b23-036a-4a55-a10a-e4b7ce792590",
-                "chat_start_date": "2025-02-25 11:05:13 AM",
-                "chat_title": "Chat on 2025-02-25 11:05:13 AM",
+                "chat_id": "8079ba9d-f8d9-43ca-bfd8-9011f33685f4",
+                "chat_start_date": "2025-02-25 09:40:16 PM",
+                "chat_title": "Chat on 2025-02-25 09:40:16 PM",
                 "chat_llm_name": "deepseek-r1:32b",
                 "active_chat": false
             },
             {
                 "project_id": "deep-dive",
-                "chat_id": "4b310c6a-c05f-4c8c-adcd-f1e59e834386",
-                "chat_start_date": "2025-02-24 10:31:49 PM",
-                "chat_title": "Chat on 2025-02-24 10:31:49 PM",
-                "chat_llm_name": "llama3.2:1b",
-                "active_chat": true
+                "chat_id": "21bab4be-5b5e-4e8d-9850-1620b5a8fb81",
+                "chat_start_date": "2025-02-25 06:19:02 PM",
+                "chat_title": "Chat on 2025-02-25 06:19:02 PM",
+                "chat_llm_name": "deepseek-r1:32b",
+                "active_chat": false
+            },
+            {
+                "project_id": "deep-dive",
+                "chat_id": "5c7f6b23-036a-4a55-a10a-e4b7ce792590",
+                "chat_start_date": "2025-02-25 11:05:13 AM",
+                "chat_title": "Coding Python Chat",
+                "chat_llm_name": "deepseek-r1:32b",
+                "active_chat": false
             },
             {
                 "project_id": "deep-dive",
@@ -56,8 +77,10 @@
                 "chat_start_date": "2025-02-24 05:47:33 PM",
                 "chat_title": "Chat as Dan",
                 "chat_llm_name": "llama3.2:1b",
-                "active_chat": false
+                "active_chat": true
             }
-        ]
+        ],
+        "project_data_toggle": false,
+        "project_data_dir": "/Users/dan/data"
     }
 ]

@@ -202,3 +202,14 @@ async def update_project_state(project_state_item: ProjectStateItem):
     return_status = project_state_manager.update_project_state(project_state_item)
     logger.trace(f"EXITING {__name__} {inspect.currentframe().f_code.co_name}")
     return return_status
+
+
+#PASSED
+@app.post("/create/project-state")
+def create_project_state(project_state_item: ProjectStateItem):
+    logger.trace(f"ENTERING  {__name__} {inspect.currentframe().f_code.co_name}")
+    logger.debug(f"params {project_state_item=}")
+    project_state_manager = ProjectStateManager.singleton()
+    project_state = project_state_manager.create_project_state(project_state_item)
+    logger.trace(f"EXITING  {__name__} {inspect.currentframe().f_code.co_name}")
+    return project_state
