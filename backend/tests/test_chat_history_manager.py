@@ -63,9 +63,10 @@ def mock_data():
 @pytest.fixture
 def chat_history_manager():
     # Use a temporary file or mock file loading
-    with patch('app.chat_history_manager.ChatHistoryManager._file_name', "resources/test_chat_history.json"):
+    with patch('app.chat_history_manager.ChatHistoryManager._file_name', None):
         with patch('app.chat_history_manager.ChatHistoryManager._load_project_state', return_value=mock_data()):
-            manager = ChatHistoryManager.singleton()
+            with patch('app.chat_history_manager.ChatHistoryManager._BaseManager__save_project_state', return_value=None):
+                manager = ChatHistoryManager.singleton()
     yield manager
     # Cleanup the singleton instance for other tests
     #logger.debug("Calling ChatHistoryManager._instance = None")

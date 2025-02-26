@@ -1,14 +1,13 @@
 import asyncio
-import os
 import inspect
+
 import requests
-from app.session_manager import SessionManager
 from app.chat_history_manager import ChatHistoryItem, ChatHistoryManager
 from app.project_state_manager import ProjectStateItem, ProjectStateManager
+from app.session_manager import SessionManager
+from app.utils.utilities import setup_logging
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from app.utils.utilities import open_ollama, setup_logging,trace
 
 logger = setup_logging()
 
@@ -101,14 +100,16 @@ async def cancel_stream():
 #PASSED
 @app.get("/get/available-models")
 async def available_models():
+    logger.trace(f"ENTERING {__name__} {inspect.currentframe().f_code.co_name}")
     url = "http://localhost:11434/api/tags"
     response = requests.get(url)
     if response.status_code == 200:
         models_data = response.json()
         model_names = sorted([model['name'] for model in models_data.get('models', [])])
-        return model_names
     else:
         raise HTTPException(status_code=response.status_code, detail="Failed to fetch models")
+    logger.trace(f"EXITING  {__name__} {inspect.currentframe().f_code.co_name}")
+    return model_names
         
 #PASSED
 @app.get("/get/chat-history/{project_id}")
@@ -129,7 +130,7 @@ def get_active_chat(project_id: str):
 #PASSED
 @app.get("/get/chat-history-timestamp/{project_id}")
 def get_chat_history_timestamp(project_id: str):
-    logger.debug(f"Params {project_id=}")
+    logger.debug(f"Params  {project_id=}")
     project_state_manager = ProjectStateManager.singleton()
     chat_history_timestamp = project_state_manager.get_chat_history_timestamp(project_id)
     logger.debug(f"Variable {chat_history_timestamp=}")
@@ -138,7 +139,7 @@ def get_chat_history_timestamp(project_id: str):
 #PASSED
 @app.delete("/delete/chat-history-item")
 async def delete_chat_history_item(chat_history_item: ChatHistoryItem):
-    logger.trace(f"ENTERING  {__name__} {inspect.currentframe().f_code.co_name}")
+    logger.trace(f"ENTERING {__name__} {inspect.currentframe().f_code.co_name}")
     chat_history_manager = ChatHistoryManager.singleton()
     updated_history = chat_history_manager.delete_chat_history_item(chat_history_item)
     if updated_history is None:
@@ -150,7 +151,7 @@ async def delete_chat_history_item(chat_history_item: ChatHistoryItem):
 #PASSED
 @app.post("/create/chat-history-item")
 def create_chat_history_item(chat_history_item: ChatHistoryItem):
-    logger.trace(f"ENTERING  {__name__} {inspect.currentframe().f_code.co_name}")
+    logger.trace(f"ENTERING {__name__} {inspect.currentframe().f_code.co_name}")
     logger.debug(f"params {chat_history_item=}")
     active_session = session_manager.get_session(chat_history_item.project_id)
     new_chat = active_session.create_new_chat(chat_history_item)
@@ -159,7 +160,7 @@ def create_chat_history_item(chat_history_item: ChatHistoryItem):
 
 @app.get("/get/chat-items/{project_id}/{chat_id}")
 def get_chat_items(project_id: str, chat_id: str):
-    logger.trace(f"ENTERING  {__name__} {inspect.currentframe().f_code.co_name}")
+    logger.trace(f"ENTERING {__name__} {inspect.currentframe().f_code.co_name}")
     logger.debug(f"params {project_id=} {chat_id=}")
     active_session = session_manager.get_session(project_id)
     chat_interactions = active_session.get_chat_interactions(chat_id)
@@ -181,12 +182,12 @@ async def update_chat_history_item_title(chat_history_item: ChatHistoryItem):
     logger.debug(f"Variable {updated_history=}")
     if updated_history is None:
         raise HTTPException(status_code=404, detail="Chat history item not found")
-    logger.trace(f"EXITING {__name__} {inspect.currentframe().f_code.co_name}")
+    logger.trace(f"EXITING  {__name__} {inspect.currentframe().f_code.co_name}")
     return updated_history
 
 @app.get("/get/project-state/{project_id}")
 def get_project_state(project_id: str):
-    logger.trace(f"ENTERING  {__name__} {inspect.currentframe().f_code.co_name}")
+    logger.trace(f"ENTERING {__name__} {inspect.currentframe().f_code.co_name}")
     logger.debug(f"params {project_id=}")
     project_state_manager = ProjectStateManager.singleton()
     project_state = project_state_manager.get_project_state(project_id)
@@ -200,14 +201,14 @@ async def update_project_state(project_state_item: ProjectStateItem):
     logger.debug(f"Params {project_state_item=}")
     project_state_manager = ProjectStateManager.singleton()
     return_status = project_state_manager.update_project_state(project_state_item)
-    logger.trace(f"EXITING {__name__} {inspect.currentframe().f_code.co_name}")
+    logger.trace(f"EXITING  {__name__} {inspect.currentframe().f_code.co_name}")
     return return_status
 
 
 #PASSED
 @app.post("/create/project-state")
 def create_project_state(project_state_item: ProjectStateItem):
-    logger.trace(f"ENTERING  {__name__} {inspect.currentframe().f_code.co_name}")
+    logger.trace(f"ENTERING {__name__} {inspect.currentframe().f_code.co_name}")
     logger.debug(f"params {project_state_item=}")
     project_state_manager = ProjectStateManager.singleton()
     project_state = project_state_manager.create_project_state(project_state_item)

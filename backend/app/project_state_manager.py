@@ -10,6 +10,7 @@ from app.utils.utilities import open_ollama, setup_logging
 from app.base_manager import BaseManager
 from app import constants
 
+
 logger = setup_logging()
     
 @dataclass
@@ -67,10 +68,7 @@ class ProjectStateManager(BaseManager):
         project_state_to_create['chat_history_items'] = []
         
         # Add the new project state item to the data
-        self.project_state_data.insert(0, project_state_to_create)
-
-        # Save the updated chat history data to disk
-        self._save_project_state()
+        self._insert(project_state_to_create)
         
         return project_state_to_create
 

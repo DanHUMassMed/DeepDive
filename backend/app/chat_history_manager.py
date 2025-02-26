@@ -1,10 +1,8 @@
-import logging
 import uuid
-from dataclasses import asdict, field
+from dataclasses import asdict
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
-from app import constants
 from app.base_manager import BaseManager
 from app.project_state_manager import ProjectStateManager
 from app.utils.utilities import setup_logging, trace

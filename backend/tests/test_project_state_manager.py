@@ -52,9 +52,10 @@ def mock_data():
 @pytest.fixture
 def project_state_manager():
     # Use a temporary file or mock file loading
-    with patch('app.project_state_manager.ProjectStateManager._file_name', "resources/test_project_state.json"):
+    with patch('app.project_state_manager.ProjectStateManager._file_name', None):
         with patch('app.project_state_manager.ProjectStateManager._load_project_state', return_value=mock_data()):
-            manager = ProjectStateManager.singleton()
+            with patch('app.project_state_manager.ProjectStateManager._BaseManager__save_project_state', return_value=None):
+                manager = ProjectStateManager.singleton()
     yield manager
     # Cleanup the singleton instance for other tests
     logging.debug(f"Reset singleton()")
