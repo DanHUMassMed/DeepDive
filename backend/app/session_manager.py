@@ -1,7 +1,11 @@
 import asyncio
+import inspect
 import os
+
+from app import constants
 from app.chat_history_manager import ChatHistoryItem, ChatHistoryManager
-from app.project_state_manager import ProjectStateManager, ProjectStateItem
+from app.project_state_manager import ProjectStateManager
+from app.utils.logging_utilities import setup_logging, trace
 from fastapi import WebSocket
 from fastapi.websockets import WebSocketState
 from langchain.chat_models import init_chat_model
@@ -10,9 +14,6 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 from langgraph.graph import START, MessagesState, StateGraph
-from app.utils.utilities import setup_logging,trace
-from app import constants
-import inspect
 
 logger = setup_logging()
 
@@ -52,12 +53,14 @@ class UserSession:
     def __init__(self, project_id):
         self._db_path = f"{get_parent_directory()}/resources/checkpoints.db"
         self.project_id = project_id
-        self.chat_history_manager = ChatHistoryManager.singleton()
-        active_chat = self.chat_history_manager.get_active_chat(self.project_id)
-        if active_chat is None:
+        
+        # If the chat history list is empty give us a new chat
+        chat_history_manager = ChatHistoryManager.singleton()
+        active_chat = chat_history_manager.get_active_chat(self.project_id)
+        if active_chat and len(active_chat)==0:
             logger.debug(f"IN before create_chat_history_item")  
             chat_item = ChatHistoryItem(project_id=self.project_id)
-            self.chat_history_manager.create_chat_history_item(chat_item)
+            chat_history_manager.create_chat_history_item(chat_item)
             logger.debug(f"IN after create_chat_history_item")   
         
         self.system_prompt = constants.DEFAULT_SYSTEM_PROMPT
@@ -66,8 +69,6 @@ class UserSession:
         
     @trace(logger)
     def _create_graph(self):
-        logger.trace(f"ENTERING  {__name__} {inspect.currentframe().f_code.co_name}")    
-
         project_state_manager = ProjectStateManager.singleton()
         project_state = project_state_manager.get_project_state(self.project_id)
         model = init_chat_model(project_state['project_llm_name'], model_provider="ollama")
@@ -108,19 +109,20 @@ class UserSession:
     @trace(logger)
     def create_new_chat(self, chat_history_item: ChatHistoryItem):
         logger.debug(f"params {chat_history_item.project_id=}")
-        active_chat = self.chat_history_manager.get_active_chat(chat_history_item.project_id)
+        chat_history_manager = ChatHistoryManager.singleton()
+        active_chat = chat_history_manager.get_active_chat(chat_history_item.project_id)
         logger.debug(f"active_chat == {active_chat}")
-        if active_chat:
+        if active_chat and len(active_chat) > 0:
             number_of_messages_in_current_chat = self.get_chat_interactions_count(active_chat['chat_id'])
             logger.debug(f"IN1 {number_of_messages_in_current_chat=}")   
 
             if number_of_messages_in_current_chat == 0:
                 # If we have not had any interaction on the active chat just remove it
                 logger.debug("FM1")
-                self.chat_history_manager.delete_chat_history_item(ChatHistoryItem(**active_chat))
+                chat_history_manager.delete_chat_history_item(ChatHistoryItem(**active_chat))
                 logger.debug("FM2")
         
-        new_chat = self.chat_history_manager.create_chat_history_item(chat_history_item)
+        new_chat = chat_history_manager.create_chat_history_item(chat_history_item)
         logger.debug(f" with={new_chat}")
         return new_chat
     
@@ -150,8 +152,6 @@ class UserSession:
                 values = last_interaction.values  
                 if 'messages' in values:
                     for message in values['messages']:
-                        #print(type(message))
-                        #print(message.content)
                         interaction_type = 'user' if isinstance(message,HumanMessage) else 'ai'
                         interaction = {'type':interaction_type, 'content':message.content}
                         interactions.append(interaction)
@@ -160,8 +160,9 @@ class UserSession:
 
     async def stream_llm(self, websocket: WebSocket, prompt: str):
         input_messages = [HumanMessage(prompt)]
-        active_chat = self.chat_history_manager.get_active_chat(self.project_id)
-        print(f"self.project_id={self.project_id} active_chat={active_chat}")
+        chat_history_manager = ChatHistoryManager.singleton()
+        active_chat = chat_history_manager.get_active_chat(self.project_id)
+        logger.debug(f"self.project_id={self.project_id} active_chat={active_chat}")
         config = {"configurable": {"thread_id": active_chat['chat_id']}}
 
         try:
@@ -176,7 +177,7 @@ class UserSession:
                         await websocket.send_text(chunk.content)
                         
         except asyncio.CancelledError:
-            print("Streaming task was canceled.")
+            logger.warning("Streaming task was canceled.")
         finally:
             if websocket.client_state == WebSocketState.CONNECTED:
                 await websocket.send_text("[DONE]")

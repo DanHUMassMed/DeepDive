@@ -4,7 +4,7 @@ import { createNewChat, getChatHistory, getActiveChat, getChatHistoryTimestamp,
     deleteChatHistoryItem, renameChat, getChatItems, getAvailableModels, getProjectState, updateProjectState
  } from '../api/chatAPI.mjs';  // Adjust the path to your module
 
-test('createNewChat should successfully create a new chat', async t => {
+test('createNewChat', async t => {
     // Arrange
     const project_id = 'deep-dive'; // Replace this with a valid project_id as needed
 

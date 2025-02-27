@@ -1,15 +1,5 @@
 [
     {
-        "project_id": "project name test",
-        "project_name": "project name test",
-        "project_start_date": "2025-02-26 10:27:43 AM",
-        "chat_history_timestamp": "2025-02-26 10:27:43.578",
-        "project_llm_name": "llama3.2:1b",
-        "project_system_prompt": "Answer all questions to the best of your ability. Answer concisely but correctly. If you do not know the answer, just say 'I don\u2019t know.'",
-        "project_data_toggle": false,
-        "chat_history_items": []
-    },
-    {
         "project_id": "my-second-project",
         "project_name": "my-second-project",
         "project_start_date": "2025-02-24 10:13:31 AM",
@@ -31,9 +21,19 @@
         "project_id": "deep-dive",
         "project_name": "deep-dive",
         "project_start_date": "2025-02-24 10:13:05 AM",
-        "chat_history_timestamp": "2025-02-24 10:13:05.472",
-        "project_llm_name": "my_better_llm",
+        "chat_history_timestamp": "2025-02-27 15:26:17.922",
+        "project_llm_name": "llama3.2:1b",
         "project_system_prompt": "Answer all questions to the best of your ability. ",
-        "chat_history_items": []
+        "chat_history_items": [
+            {
+                "project_id": "deep-dive",
+                "chat_id": "ad4a4754-7dec-491d-85f7-adc16d41ab22",
+                "chat_start_date": "2025-02-27 02:34:11 PM",
+                "chat_title": "Chat on 2025-02-27 02:34:11 PM",
+                "chat_llm_name": "llama3.2:1b",
+                "active_chat": true
+            }
+        ],
+        "project_data_toggle": false
     }
 ]

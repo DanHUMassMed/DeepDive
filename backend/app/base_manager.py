@@ -1,14 +1,15 @@
 import json
 import os
-from app.utils.utilities import setup_logging
 import threading
+
+from app.utils.logging_utilities import setup_logging
 
 logger = setup_logging()
     
     
 class BaseManager:
     """
-    Singleton class to manage and load project state from a file.
+    Singleton class to manage and load project state json from a file.
     """
     _instance = None
     _file_name = "resources/project_state.json"
@@ -66,7 +67,7 @@ class BaseManager:
         item = next((item for item in self.project_state_data if item.get(key) == value), None)
         
         if item is None:
-            return None  # No matching item found
+            return {}  # No matching item found
         
         if return_fields is None:
             return item  # Return all fields if return_fields is None
@@ -74,10 +75,8 @@ class BaseManager:
         # Return only the specified fields
         return {field: item.get(field) for field in return_fields if field in item}
 
-    def get_project_state(self):
-        return self.project_state_data
-
     def _insert(self, new_data):
+        """Insert a new project state item"""
         # Use lock to ensure thread-safe updates to project_state_data
         with BaseManager._lock:
             self.project_state_data.insert(0, new_data)

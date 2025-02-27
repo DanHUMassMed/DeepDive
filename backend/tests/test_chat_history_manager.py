@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 from unittest.mock import patch, mock_open
 from app.chat_history_manager import ChatHistoryManager, ChatHistoryItem
-from app.utils.utilities import setup_logging
+from app.utils.logging_utilities import setup_logging
 import copy
 import inspect
 import time

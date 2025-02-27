@@ -17,3 +17,7 @@ This project demonstrates how to build a simple FastAPI application that interac
 ```bash
 uvicorn app.main:app --reload
 ```
+
+#### Swagger
+* http://127.0.0.1:8000/docs#/
+

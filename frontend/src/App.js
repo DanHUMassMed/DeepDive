@@ -17,7 +17,7 @@ function ChatContainer() {
       const fetchChatMessages = async () => {
         try {
           const activeChat = await getActiveChat(config.project_id);
-          if (activeChat) {
+          if (activeChat && Object.keys(activeChat).length > 0) {
             const chatItems = await getChatItems(config.project_id, activeChat.chat_id);
             setChatMessages(chatItems);
           }
