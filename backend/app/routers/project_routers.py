@@ -19,6 +19,7 @@ logger = setup_logging()
 router = APIRouter()
 
 @router.get("/{project_id}/state", tags=["project"])
+@trace(logger)
 def get_project_state(project_id: str):
     logger.debug(f"params {project_id=}")
     project_state_manager = ProjectStateManager.singleton()
@@ -33,6 +34,7 @@ def get_project_state(project_id: str):
 
 
 @router.post("/state", tags=["project"])
+@trace(logger)
 def create_project_state(project_state_item: ProjectStateItem):
     logger.debug(f"params {project_state_item=}")
     project_state_manager = ProjectStateManager.singleton()
@@ -45,6 +47,7 @@ def create_project_state(project_state_item: ProjectStateItem):
     return response_data
  
 @router.put("/{project_id}/state", tags=["project"])
+@trace(logger)
 async def update_project_state(project_state_item: ProjectStateItem):
     logger.debug(f"Params {project_state_item=}")
     project_state_manager = ProjectStateManager.singleton()
@@ -58,6 +61,7 @@ async def update_project_state(project_state_item: ProjectStateItem):
     return response_data
 
 @router.delete("/{project_id}/state", tags=["project"])
+@trace(logger)
 async def delete_project_state(project_id: str):
     logger.debug(f"Params {project_id=}")
     project_state_manager = ProjectStateManager.singleton()

@@ -118,14 +118,14 @@ def trace(logger):
 
                 try:
                     result = await func(*args, **kwargs)
-                except Exception:
-                    logger.trace(f"{IndentManager.get_indent():02d} {indent}EXCEPTION {log_message_core}")
+                except Exception as err:
+                    logger.trace(f"{IndentManager.get_indent():02d} {indent}EXCEPTION {log_message_core} {err}")
+                    raise
                 finally:
-                    IndentManager.decrement()
-                
-                logger.trace(f"{IndentManager.get_indent():02d} {indent}EXITING  {log_message_core}")
-                if IndentManager.get_indent()==0:
-                    logger.trace("")
+                    IndentManager.decrement()                
+                    logger.trace(f"{IndentManager.get_indent():02d} {indent}EXITING  {log_message_core}")
+                    if IndentManager.get_indent()==0:
+                        logger.trace("")
                                     
                 return result
             else:
@@ -153,15 +153,15 @@ def trace(logger):
 
                 try:
                     result = func(*args, **kwargs)
-                except Exception:
-                    logger.trace(f"{IndentManager.get_indent():02d} {indent}EXCEPTION {log_message_core}")
+                except Exception as err:
+                    logger.trace(f"{IndentManager.get_indent():02d} {indent}EXCEPTION {log_message_core} {err}")
+                    raise
                 finally:
-                    IndentManager.decrement()
-                
-                logger.trace(f"{IndentManager.get_indent():02d} {indent}EXITING  {log_message_core}")
-                if IndentManager.get_indent()==0:
-                    logger.trace("")
-                
+                    IndentManager.decrement()               
+                    logger.trace(f"{IndentManager.get_indent():02d} {indent}EXITING  {log_message_core}")
+                    if IndentManager.get_indent()==0:
+                        logger.trace("")
+                    
                 return result
             else:
                 # If log level is not TRACE, simply call the function without logging

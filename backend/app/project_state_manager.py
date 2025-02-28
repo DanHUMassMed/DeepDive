@@ -110,7 +110,7 @@ class ProjectStateManager(BaseManager):
             logger.debug(f"{project_state_to_update=}")
             # Ensure project_id is found
             if 'project_id' not in  project_state_to_update:
-                return {'status':'FAILED', 'status_code':500, 
+                return {'status':'FAILED', 'status_code':404, 
                     'message':f"project_name [{project_state_item.project_name}] not found to update_project_state. "}
             
             updated_fields = {}
