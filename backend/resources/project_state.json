@@ -1,5 +1,33 @@
 [
     {
+        "project_id": "my-new-project",
+        "project_name": "my-new-project",
+        "project_start_date": "2025-02-28 09:17:27 AM",
+        "chat_history_timestamp": "2025-02-28 10:22:58.635",
+        "project_llm_name": "deepseek-r1:32b",
+        "project_system_prompt": "Answer all questions to the best of your ability. Answer concisely but correctly. If you do not know the answer, just say 'I don\u2019t know.'",
+        "project_data_dir": "/User/home/amy",
+        "project_data_toggle": false,
+        "chat_history_items": [
+            {
+                "project_id": "my-new-project",
+                "chat_id": "c10479d4-c1fa-405d-aac2-a6d7853d91dc",
+                "chat_start_date": "2025-02-28 10:19:58 AM",
+                "chat_title": "Chat on 2025-02-28 10:19:58 AM",
+                "chat_llm_name": "deepseek-r1:32b",
+                "active_chat": true
+            },
+            {
+                "project_id": "my-new-project",
+                "chat_id": "57132c50-ea95-4b4e-b9d4-548e4ed6ff11",
+                "chat_start_date": "2025-02-28 10:10:31 AM",
+                "chat_title": "Chat on 2025-02-28 10:10:31 AM",
+                "chat_llm_name": "deepseek-r1:32b",
+                "active_chat": false
+            }
+        ]
+    },
+    {
         "project_id": "my-second-project",
         "project_name": "my-second-project",
         "project_start_date": "2025-02-24 10:13:31 AM",
@@ -21,7 +49,7 @@
         "project_id": "deep-dive",
         "project_name": "deep-dive",
         "project_start_date": "2025-02-24 10:13:05 AM",
-        "chat_history_timestamp": "2025-02-27 15:26:17.922",
+        "chat_history_timestamp": "2025-02-28 08:53:06.144",
         "project_llm_name": "llama3.2:1b",
         "project_system_prompt": "Answer all questions to the best of your ability. ",
         "chat_history_items": [

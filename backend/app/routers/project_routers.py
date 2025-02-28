@@ -1,17 +1,6 @@
-import asyncio
-import inspect
-import os
-
-
-from app.chat_history_manager import ChatHistoryItem, ChatHistoryManager
 from app.project_state_manager import ProjectStateItem, ProjectStateManager
-from app.session_manager import SessionManager
 from app.utils.logging_utilities import setup_logging, trace
-from app.utils.ollama_utilities import get_available_ollama_models
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
-from fastapi.middleware.cors import CORSMiddleware
-import debugpy
-from app.routers import project_routers
+from fastapi import HTTPException
 from fastapi import APIRouter
 
 logger = setup_logging()
@@ -33,7 +22,7 @@ def get_project_state(project_id: str):
     return response_data
 
 
-@router.post("/state", tags=["project"])
+@router.post("/state", tags=["projects"])
 @trace(logger)
 def create_project_state(project_state_item: ProjectStateItem):
     logger.debug(f"params {project_state_item=}")
@@ -48,10 +37,15 @@ def create_project_state(project_state_item: ProjectStateItem):
  
 @router.put("/{project_id}/state", tags=["project"])
 @trace(logger)
-async def update_project_state(project_state_item: ProjectStateItem):
+async def update_project_state(project_id: str, project_state_item: ProjectStateItem):
     logger.debug(f"Params {project_state_item=}")
-    project_state_manager = ProjectStateManager.singleton()
-    response_data = project_state_manager.update_project_state(project_state_item)
+    if project_state_item.project_name != project_id:
+        response_data= {'status':'FAILED',
+                   'status_code':400, 
+                   'message':f"{project_id} and {project_state_item.project_name} MUST be equal"}
+    else:    
+        project_state_manager = ProjectStateManager.singleton()
+        response_data = project_state_manager.update_project_state(project_state_item)
     logger.debug(f"{response_data=}")
     if 'status_code' in response_data and 400 <= response_data['status_code'] <= 599:
         raise HTTPException(
@@ -74,4 +68,17 @@ async def delete_project_state(project_id: str):
         )
     return response_data
 
+@router.get("/{project_id}/timestamp", tags=["project"])
+@trace(logger)
+async def get_chat_history_timestamp(project_id: str):
+    logger.debug(f"Params {project_id=}")
+    project_state_manager = ProjectStateManager.singleton()
+    response_data = project_state_manager.get_chat_history_timestamp(project_id)
+    logger.debug(f"{response_data=}")
+    if 'status_code' in response_data and 400 <= response_data['status_code'] <= 599:
+        raise HTTPException(
+            status_code=response_data['status_code'],
+            detail=response_data
+        )
+    return response_data
         

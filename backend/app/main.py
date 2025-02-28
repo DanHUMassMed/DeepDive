@@ -7,11 +7,10 @@ from app.chat_history_manager import ChatHistoryItem, ChatHistoryManager
 from app.project_state_manager import ProjectStateItem, ProjectStateManager
 from app.session_manager import SessionManager
 from app.utils.logging_utilities import setup_logging, trace
-from app.utils.ollama_utilities import get_available_ollama_models
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 import debugpy
-from app.routers import project_routers
+from app.routers import project_routers, ollama_routers, chat_history_routers
 
 ACTIVATE_DEBUG = os.getenv("ACTIVATE_DEBUG", False)
 if ACTIVATE_DEBUG:
@@ -37,6 +36,8 @@ app.add_middleware(
 )
 
 app.include_router(project_routers.router, prefix="/projects")
+app.include_router(ollama_routers.router, prefix="/ollama")
+app.include_router(chat_history_routers.router, prefix="/chat-history")
 
 
 # Instantiate session manager
@@ -117,79 +118,6 @@ connection_manager = ConnectionManager()
 #     return {"status": "Task canceled"}
 
 
-# @app.get("/get/available-models")
-# @trace(logger)
-# async def available_models():
-#     #logger.trace(f"ENTERING {__name__} {inspect.currentframe().f_code.co_name}")
-#     model_names = get_available_ollama_models()
-#     #logger.trace(f"EXITING  {__name__} {inspect.currentframe().f_code.co_name}")
-#     return model_names
         
-# @app.get("/get/chat-history/{project_id}")
-# @trace(logger)
-# def get_chat_history(project_id: str):
-#     chat_history_manager = ChatHistoryManager.singleton()
-#     chat_history = chat_history_manager.get_chat_history(project_id)
-#     return chat_history
 
-# @app.get("/get/active-chat/{project_id}")
-# @trace(logger)
-# def get_active_chat(project_id: str):
-#     logger.debug(f"get_active_chat Params {project_id=}")
-#     chat_history_manager = ChatHistoryManager.singleton()
-#     active_chat = chat_history_manager.get_active_chat(project_id)
-#     return active_chat
-
-# @app.get("/get/chat-history-timestamp/{project_id}")
-# @trace(logger)
-# def get_chat_history_timestamp(project_id: str):
-#     logger.debug(f"get_chat_history_timestamp Params  {project_id=}")
-#     project_state_manager = ProjectStateManager.singleton()
-#     chat_history_timestamp = project_state_manager.get_chat_history_timestamp(project_id)
-#     return chat_history_timestamp
-
-# @app.post("/create/chat-history-item")
-# @trace(logger)
-# def create_chat_history_item(chat_history_item: ChatHistoryItem):
-#     logger.debug(f"create_chat_history_item params {chat_history_item=}")
-#     active_session = session_manager.get_session(chat_history_item.project_id)
-#     new_chat = active_session.create_new_chat(chat_history_item)
-#     return new_chat
-
-# @app.delete("/delete/chat-history-item")
-# @trace(logger)
-# async def delete_chat_history_item(chat_history_item: ChatHistoryItem):
-#     logger.trace(f"ENTERING {__name__} {inspect.currentframe().f_code.co_name}")
-#     chat_history_manager = ChatHistoryManager.singleton()
-#     updated_history = chat_history_manager.delete_chat_history_item(chat_history_item)
-#     if updated_history is None:
-#         logger.debug("EXITING delete_chat_history: Item not found")
-#         raise HTTPException(status_code=404, detail="Chat history item not found")
-#     logger.trace(f"EXITING  {__name__} {inspect.currentframe().f_code.co_name}")
-#     return updated_history
-
-# @app.get("/get/chat-items/{project_id}/{chat_id}")
-# def get_chat_items(project_id: str, chat_id: str):
-#     logger.trace(f"ENTERING {__name__} {inspect.currentframe().f_code.co_name}")
-#     logger.debug(f"params {project_id=} {chat_id=}")
-#     active_session = session_manager.get_session(project_id)
-#     chat_interactions = active_session.get_chat_interactions(chat_id)
-#     chat_history_manager = ChatHistoryManager.singleton()
-#     #TODO WHY IS THIS A SET OPERATION set_active_chat?
-#     chat_history_manager.set_active_chat(ChatHistoryItem(project_id=project_id, chat_id=chat_id))
-#     #update timestamp
-#     logger.trace(f"EXITING  {__name__} {inspect.currentframe().f_code.co_name}")
-#     return chat_interactions
-
-# @app.post("/update/chat-history-item-title")
-# async def update_chat_history_item_title(chat_history_item: ChatHistoryItem):
-#     logger.trace(f"ENTERING {__name__} {inspect.currentframe().f_code.co_name}")
-#     logger.debug(f"Params {chat_history_item=}")
-#     chat_history_manager = ChatHistoryManager.singleton()
-#     updated_history = chat_history_manager.update_chat_history_item_title(chat_history_item)
-#     logger.debug(f"Variable {updated_history=}")
-#     if updated_history is None:
-#         raise HTTPException(status_code=404, detail="Chat history item not found")
-#     logger.trace(f"EXITING  {__name__} {inspect.currentframe().f_code.co_name}")
-#     return updated_history
 

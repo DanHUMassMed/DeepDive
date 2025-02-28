@@ -12,7 +12,8 @@ logger = setup_logging()
     
 @dataclass
 class ProjectStateItem:
-    project_name: str
+    project_id: Optional[str] = None
+    project_name: Optional[str] = None
     project_llm_name: Optional[str] = None
     project_system_prompt: Optional[str] = None
     project_data_dir: Optional[str] = None
@@ -27,6 +28,7 @@ class ProjectStateManager(BaseManager):
         ret_val = {'status':'FAILED', 'status_code':404, 'message':f"Project id [{project_id}] not found."}
         try:
             found = self._search('project_id', project_id, return_fields)
+            logger.debug(f"{found=}")
             if 'project_name' in found:
                 ret_val = found
         except Exception as err:
@@ -36,31 +38,14 @@ class ProjectStateManager(BaseManager):
             ret_val = {'status':'FAILED', 'status_code':500, 'message':str(err)}
         return ret_val
 
-    @trace(logger)
-    def delete_project_state(self, project_id):
-        """Delete project state item for the given project_id and save the updated list to disk."""
-        ret_val = {'status':'SUCCESS', 'status_code':200}
-        try:
-            found = self._search('project_id', project_id,['project_id'])
-            if 'project_id' in found:
-                self._delete('project_id', project_id)
-            else:
-                ret_val = {'status':'FAILED', 'status_code':404, 'message':f"Project id [{project_id}] not found."}
-        except Exception as err:
-            class_name = self.__class__.__name__ if hasattr(self, '__class__') else 'UnknownClass'
-            method_name = inspect.currentframe().f_code.co_name
-            logger.error(f"Exception in {class_name}.{method_name} {err}")            
-            ret_val = {'status':'FAILED', 'status_code':500, 'message':str(err)}
-            
-        return ret_val
         
     @trace(logger)
     def create_project_state(self, project_state_item: ProjectStateItem):
-        """Add a new project state item to the list."""
+        """Create a new project state item to the list."""
         ret_val = {'status':'FAILED', 'status_code':500, 'message':'create_project_state failed to return a state'}
         # Ensure project_name is unique
         if self._search('project_id', project_state_item.project_name):
-            return {'status':'FAILED', 'status_code':500, 
+            return {'status':'FAILED', 'status_code':400, 
                     'message':f"Project Name [{project_state_item.project_name}] already exists. Project name must be unique."}
             
         try:
@@ -103,7 +88,7 @@ class ProjectStateManager(BaseManager):
 
     @trace(logger)
     def update_project_state(self, project_state_item: ProjectStateItem):
-        """Add a new project state item to the list."""
+        """Update a project state item that is in the list."""
         ret_val = {'status':'FAILED', 'status_code':500, 'message':'update_project_state failed to return a state'}
         try:
             project_state_to_update = self._search('project_id', project_state_item.project_name)
@@ -136,14 +121,34 @@ class ProjectStateManager(BaseManager):
             ret_val = {'status':'FAILED', 'status_code':500, 'message':str(err)}
         
         return ret_val
+
+    @trace(logger)
+    def delete_project_state(self, project_id):
+        """Delete project state item for the given project_id."""
+        ret_val = {'status':'SUCCESS', 'status_code':200}
+        try:
+            found = self._search('project_id', project_id,['project_id'])
+            if 'project_id' in found:
+                self._delete('project_id', project_id)
+            else:
+                ret_val = {'status':'FAILED', 'status_code':404, 'message':f"Project id [{project_id}] not found."}
+        except Exception as err:
+            class_name = self.__class__.__name__ if hasattr(self, '__class__') else 'UnknownClass'
+            method_name = inspect.currentframe().f_code.co_name
+            logger.error(f"Exception in {class_name}.{method_name} {err}")            
+            ret_val = {'status':'FAILED', 'status_code':500, 'message':str(err)}
+            
+        return ret_val
                
     @trace(logger)
     def get_chat_history_timestamp(self, project_id):
-        """Get an existing project state item if found, and return chat_history_timestamp"""
-        ret_val = {'status':'FAILED', 'status_code':500, 'message':'get_chat_history_timestamp failed to return a state'}
+        """Get an existing project state item if found, and return chat_history_timestamp."""
+        ret_val = {'status':'FAILED', 'status_code':400, 'message':f"get_chat_history_timestamp failed to return a timestamp for [{project_id}]"}
         try:
             return_fields = ['chat_history_timestamp']
-            ret_val = self._search('project_id', project_id, return_fields)
+            chat_history_timestamp = self._search('project_id', project_id, return_fields)
+            if len(chat_history_timestamp)==1:
+                return chat_history_timestamp
         except Exception as err:
             class_name = self.__class__.__name__ if hasattr(self, '__class__') else 'UnknownClass'
             method_name = inspect.currentframe().f_code.co_name
