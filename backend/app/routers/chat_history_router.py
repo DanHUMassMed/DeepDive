@@ -37,7 +37,6 @@ async def delete_chat_history_items(project_id: str):
         )
     return response_data
 
-    
 @router.get("/{project_id}/active-chat", tags=["chat-history"])
 @trace(logger)
 async def get_active_chat(project_id: str):
@@ -111,6 +110,7 @@ async def update_chat_history_item_title(project_id, chat_id,chat_history_item: 
 @trace(logger)
 async def delete_chat_history_item(project_id, chat_id):
     """Delete a specific chat history item by chat_id and return status"""
+    logger.debug(f"delete_chat_history_item {project_id=} {chat_id=}")
     chat_history_manager = ChatHistoryManager.singleton()
     response_data = chat_history_manager.delete_chat_history_item(project_id, chat_id)
     if 'status_code' in response_data and 400 <= response_data['status_code'] <= 599:

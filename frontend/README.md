@@ -6,3 +6,6 @@
 ```
 npx ava path/to/test-file.js --match='specific test description'
 npx ava -m 'getAvailableModels'
+
+
+npx ava "src/test/**/*-test.mjs" -m 'getActiveChat Test'

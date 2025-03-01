@@ -72,7 +72,7 @@ class ChatHistoryManager(BaseManager):
                    'message':f"No Active chat found for Project id [{project_id}]."}
         chat_history_items_found = self.get_chat_history_items(project_id)
         
-        if isinstance(chat_history_items_found,list):        
+        if isinstance(chat_history_items_found,list):
             for item in chat_history_items_found:
                 if item['active_chat']:
                     return item
@@ -129,6 +129,8 @@ class ChatHistoryManager(BaseManager):
         # Set chat_llm_name if it is not provided or blank
         project_state_manager = ProjectStateManager.singleton()
         project_state = project_state_manager.get_project_state(chat_history_item.project_id)
+        
+        
         chat_history_item.chat_llm_name = project_state['project_llm_name']
         
 
