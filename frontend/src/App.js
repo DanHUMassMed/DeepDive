@@ -5,7 +5,8 @@ import LeftNav from './components/LeftNav';
 import RightNav from './components/RightNav';
 import DialogContainer from './components/DialogContainer';
 import { ConfigProvider, useConfig } from './components/ConfigContext';
-import { getActiveChat, getChatItems } from "./api/chatAPI.mjs"
+import { getChatInteractions } from "./api/chatAPI.mjs"
+import { getActiveChat } from "./api/chatHistoryAPI.mjs"
 
 function ChatContainer() {
   const [chatMessages, setChatMessages] = useState([]);
@@ -18,7 +19,7 @@ function ChatContainer() {
         try {
           const activeChat = await getActiveChat(config.project_id);
           if (activeChat && Object.keys(activeChat).length > 0) {
-            const chatItems = await getChatItems(config.project_id, activeChat.chat_id);
+            const chatItems = await getChatInteractions(config.project_id, activeChat.chat_id);
             setChatMessages(chatItems);
           }
         } catch (error) {

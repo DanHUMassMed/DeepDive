@@ -2,7 +2,7 @@ import React, { useRef, useState, useContext, useEffect } from 'react';
 import ConfigContext from './ConfigContext';
 import ChatHistoryItem from './ChatHistoryItem';
 import { IoIosSearch } from 'react-icons/io';
-import { getChatHistory } from "../api/chatAPI.mjs"
+import { getChatHistoryItems } from "../api/chatHistoryAPI.mjs"
 
 const LeftNav = ( { setChatMessages } ) => {
   const { config, setConfig  } = useContext(ConfigContext);
@@ -11,7 +11,7 @@ const LeftNav = ( { setChatMessages } ) => {
   useEffect(() => {
     const fetchChatHistory = async () => {
       try {
-        const chatHistoryServer = await getChatHistory(config.project_id);
+        const chatHistoryServer = await getChatHistoryItems(config.project_id);
         setChatHistory(chatHistoryServer);
         // alert(chatHistoryServer.length);
         //alert("Left Nav");

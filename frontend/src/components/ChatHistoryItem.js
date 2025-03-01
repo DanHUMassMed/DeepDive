@@ -3,7 +3,10 @@ import { MdOutlineDriveFileRenameOutline } from "react-icons/md";
 import { FiShare } from "react-icons/fi";
 import { RiDeleteBinLine } from "react-icons/ri";
 import { Tooltip } from 'react-tooltip';
-import { renameChat, getChatHistoryTimestamp, deleteChatHistoryItem, getChatItems } from "../api/chatAPI.mjs"
+import { getChatHistoryTimestamp } from "../api/projectAPI.mjs"
+import { getChatInteractions } from "../api/chatAPI.mjs"
+import { updateChatHistoryTitle, deleteChatHistoryItem } from "../api/chatHistoryAPI.mjs"
+
 import ConfigContext from './ConfigContext';
 
 
@@ -20,7 +23,7 @@ const ChatHistoryItem = ({ setChatMessages, chat }) => {
 
   const handleClick = () => {
     console.log(`Bringing back chat: ${chat_title}`);
-    getChatItems(project_id, chat_id)
+    getChatInteractions(project_id, chat_id)
     .then((chatItem) => {
       // Handle the updated chat item here
       console.log('Updated chat items:', chatItem);
@@ -84,7 +87,7 @@ const ChatHistoryItem = ({ setChatMessages, chat }) => {
 
   const handleRename = () => {
     console.log(`Renaming chat to: ${newName}`);
-    renameChat(project_id, chat_id, newName)
+    updateChatHistoryTitle(project_id, chat_id, newName)
       .then((chatItem) => {
         // Handle the updated chat item here
         console.log('Updated chat item:', chatItem);

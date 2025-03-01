@@ -1,7 +1,7 @@
-// createNewChat.test.js
+
 import test from 'ava';
 import { getChatHistoryItems, deleteChatHistoryItems, getActiveChat, setActiveChat, createChatHistoryItem, updateChatHistoryTitle, deleteChatHistoryItem
- } from '../../api/chatHistoryAPI.mjs';  // Adjust the path to your module
+ } from '../../api/chatHistoryAPI.mjs';  
 
 test('getChatHistoryItems Test', async t => {
     // Arrange

@@ -1,4 +1,4 @@
-from app.utils.logging_utilities import setup_logging
+from app.utils.logging_utilities import setup_logging, trace
 from fastapi import APIRouter
 import inspect
 import traceback
@@ -6,6 +6,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 import asyncio
 import inspect
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, FastAPI, BackgroundTasks
+from fastapi import HTTPException
 from typing import Dict
 import asyncio
 from app.chat_manager import ChatManager
@@ -78,3 +79,21 @@ async def cancel_connection(connection_id: str):
     return {"status": "FAILED", "message": "No active connection found."}
 
 
+@router.get("/{project_id}/interactions/{chat_id}", tags=["project"])
+@trace(logger)
+async def get_chat_interactions(project_id: str,chat_id: str):
+    logger.debug(f"Params {project_id=}")
+    project_state_manager = ProjectStateManager.singleton()
+    project_state = project_state_manager.get_project_state(project_id)
+    llm_name = project_state['project_llm_name']
+    system_prompt = project_state['project_system_prompt']
+    chat_manager = ChatManager(llm_name=llm_name,system_prompt=system_prompt)
+    response_data = chat_manager.get_chat_interactions(chat_id)
+    logger.debug(f"{response_data=}")
+    if 'status_code' in response_data and 400 <= response_data['status_code'] <= 599:
+        raise HTTPException(
+            status_code=response_data['status_code'],
+            detail=response_data
+        )
+    return response_data
+        

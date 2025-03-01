@@ -1,6 +1,6 @@
 import { useEffect, useRef, useContext } from 'react';
 import ConfigContext from '../components/ConfigContext';
-import { getActiveChat } from "../api/chatAPI.mjs"
+import { getActiveChat } from "../api/chatHistoryAPI.mjs"
 
 const useChatEffect = (messageToSend, setChatMessage) => {
   const { config, setConfig  } = useContext(ConfigContext);
@@ -34,7 +34,7 @@ const useChatEffect = (messageToSend, setChatMessage) => {
 
     if (messageToSend.trim()) {
       // Initialize WebSocket connection
-      websocketRef.current = new WebSocket(`ws://localhost:8000/ws/sendMessage?project_id=${config.project_id}`);
+      websocketRef.current = new WebSocket(`ws://localhost:8000/chat/ws/${config.project_id}`);
 
       websocketRef.current.onopen = () => {
         setIsProcessing(true);

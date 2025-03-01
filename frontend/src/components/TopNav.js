@@ -3,7 +3,8 @@ import ConfigContext from './ConfigContext';
 
 import { VscLayoutSidebarLeft, VscLayoutSidebarLeftOff, VscLayoutSidebarRight, VscLayoutSidebarRightOff } from 'react-icons/vsc';
 import { HiOutlinePencilSquare } from "react-icons/hi2";
-import { createNewChat, getChatHistoryTimestamp } from "../api/chatAPI.mjs"
+import { createChatHistoryItem } from "../api/chatHistoryAPI.mjs"
+import { getChatHistoryTimestamp } from "../api/projectAPI.mjs"
 
 
 const TopNav = () => {
@@ -26,7 +27,7 @@ const TopNav = () => {
   };
 
   const onNewChat = async (e) => {
-    const newChat = await createNewChat(config.project_id)
+    const newChat = await createChatHistoryItem({project_id:config.project_id})
     const chatHistoryTimestamp = await getChatHistoryTimestamp(config.project_id)
     setConfig((prevConfig) => ({
       ...prevConfig,

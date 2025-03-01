@@ -2,7 +2,8 @@ import React, { useState, useContext, useEffect } from 'react';
 import ConfigContext from './ConfigContext';
 import SelectLLM from './SelectLLM';
 import SystemPrompt from './SystemPrompt';
-import { getAvailableModels, getProjectState, updateProjectState } from "../api/chatAPI.mjs"
+import { getProjectState, updateProjectState } from "../api/projectAPI.mjs"
+import { getAvailableModels } from "../api/ollamaAPI.mjs"
 
 const RightNav = ({ isOpen }) => {
   const { config, setConfig } = useContext(ConfigContext);
