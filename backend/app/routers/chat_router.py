@@ -74,7 +74,8 @@ async def websocket_chat(websocket: WebSocket, connection_id: str):
 @router.post("/cancel/{connection_id}", tags=["chat"])
 async def cancel_connection(connection_id: str):
     if connection_id in active_connections:
-        cancellation_tokens[connection_id].set()  # Trigger the cancellation event
+        websocket = active_connections[connection_id]
+        await websocket.close(code=1000)
         return {"status": "SUCCESS", "message": f"Connection {connection_id} canceled."}
     return {"status": "FAILED", "message": "No active connection found."}
 
