@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 from dataclasses import dataclass
 from app.utils.logging_utilities import setup_logging, trace
-from app.base_manager import BaseManager
+from app.managers.base_manager import BaseManager
 from app import constants
 import inspect
 from dataclasses import asdict

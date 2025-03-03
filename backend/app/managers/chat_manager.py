@@ -3,9 +3,10 @@ import inspect
 import os
 
 from app import constants
-from app.chat_history_manager import ChatHistoryItem, ChatHistoryManager
-from app.project_state_manager import ProjectStateManager
+from app.managers.chat_history_manager import ChatHistoryItem, ChatHistoryManager
+from app.managers.project_state_manager import ProjectStateManager
 from app.utils.logging_utilities import setup_logging, trace
+from app.utils.workspace_utilities import get_project_workspace
 from fastapi import WebSocket
 from fastapi.websockets import WebSocketState
 from langchain.chat_models import init_chat_model
@@ -17,15 +18,10 @@ from langgraph.graph import START, MessagesState, StateGraph
 
 logger = setup_logging()
 
-def get_parent_directory():
-    directory = os.path.dirname(__file__)
-    parent_directory = os.path.dirname(directory)
-    return parent_directory
-
 class ChatManager:
     @trace(logger)
     def __init__(self, llm_name = constants.DEFAULT_LLM, system_prompt = constants.DEFAULT_SYSTEM_PROMPT):
-        self._db_path = f"{get_parent_directory()}/resources/checkpoints.db"
+        self._db_path = f"{get_project_workspace()}/checkpoints.db"
         self._llm_name = llm_name
         self._system_prompt = system_prompt
     
@@ -50,8 +46,6 @@ class ChatManager:
             self._system_prompt = value
         else:
             raise ValueError("system_prompt must be a non-empty string")
-
-
     
     @trace(logger)
     def _create_prompt_and_reply_graph(self):

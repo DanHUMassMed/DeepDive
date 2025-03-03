@@ -71,7 +71,7 @@ const RightNav = ({ isOpen }) => {
       project_data_dir:researchDataLocation,
       project_data_toggle:useLocalData
     };
-    updateProjectState(projectData);
+    updateProjectState(config.project_id,projectData);
   };
 
   return (

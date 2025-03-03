@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import ConfigContext from './ConfigContext';
+import Think from './Think';
 import { CiGlobe } from 'react-icons/ci';
 import { IoBulbOutline, IoArrowUpCircle, IoStop } from 'react-icons/io5';
 
@@ -10,7 +11,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { dark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import useChatEffect from '../hooks/useChatEffect';
 import { cancelActiveChat } from '../api/chatAPI.mjs';
-
+import rehypeRaw from 'rehype-raw';
 
 // DialogContainer Component - Main container for the chat UI
 const DialogContainer = ({ chatMessages, setChatMessages }) => {
@@ -45,7 +46,8 @@ const DialogContainer = ({ chatMessages, setChatMessages }) => {
   const handleStopMessage = (e) => {
     e.preventDefault();
     if (config.isProcessingPrompt) {
-      cancelActiveChat(closeWebSocket)
+      cancelActiveChat(config.project_id)
+      config.isProcessingPrompt = false
     }
   };
 
@@ -113,6 +115,35 @@ const UserDialog = ({ interaction }) => {
 
 // AIDialog Component - AI's response with avatar and text
 const AIDialog = ({ interaction }) => {
+  const [isOpen, setIsOpen] = useState(true);
+
+  const toggleSection = () => setIsOpen(!isOpen);
+
+  const components = {
+    // Custom rendering for <think> tags
+    think({ children, ...rest }) {
+     return  <Think>{children}</Think>
+    },
+
+    code({ className, children, ...rest }) {
+      const match = /language-(\w+)/.exec(className || '');
+      return match ? (
+        <SyntaxHighlighter
+          PreTag="div"
+          language={match[1]}
+          style={dark}
+          {...rest}
+        >
+          {children}
+        </SyntaxHighlighter>
+      ) : (
+        <code {...rest} className={className}>
+          {children}
+        </code>
+      );
+    }
+  };
+
   return (
     <div className="flex items-center w-full max-w-full space-x-2 bg-gray-100 p-3 rounded-lg">
       <img
@@ -121,25 +152,7 @@ const AIDialog = ({ interaction }) => {
         className="rounded-full w-10 h-10"
       />
       <div className="text-sm">
-        <ReactMarkdown remarkPlugins={[remarkGfm, remarkHtml]} components={{
-          code({ className, children, ...rest }) {
-            const match = /language-(\w+)/.exec(className || "");
-            return match ? (
-              <SyntaxHighlighter
-                PreTag="div"
-                language={match[1]}
-                style={dark}
-                {...rest}
-              >
-                {children}
-              </SyntaxHighlighter>
-            ) : (
-              <code {...rest} className={className}>
-                {children}
-              </code>
-            );
-          },
-        }}
+        <ReactMarkdown remarkPlugins={[remarkGfm, remarkHtml]} rehypePlugins={[rehypeRaw]} components={components}
 >{interaction.content}</ReactMarkdown>
       </div>
     </div>

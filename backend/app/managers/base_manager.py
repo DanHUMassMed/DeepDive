@@ -1,6 +1,7 @@
 import json
 import os
 import threading
+from app.utils.workspace_utilities import get_project_workspace
 
 from app.utils.logging_utilities import setup_logging
 
@@ -12,7 +13,7 @@ class BaseManager:
     Singleton class to manage and load project state json from a file.
     """
     _instance = None
-    _file_name = "resources/project_state.json"
+    _file_name = "project_state.json"
     _lock = threading.Lock()  # Lock for synchronization
  
 
@@ -20,11 +21,7 @@ class BaseManager:
         if BaseManager._instance is not None:
             raise Exception("This class is a singleton! Use singleton() to get the instance.")
         
-        if self._file_name is not None: # Added for testing
-            self._file_name = f"{self._get_parent_directory()}/{self._file_name}"
-            directory = os.path.dirname(self._file_name)
-            if not os.path.exists(directory):
-                os.makedirs(directory)
+        self._file_name = f"{get_project_workspace()}/{self._file_name}"
             
         with BaseManager._lock:
             self.project_state_data = self._load_project_state()
@@ -38,11 +35,6 @@ class BaseManager:
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
-
-    def _get_parent_directory(self):
-        directory = os.path.dirname(__file__)
-        parent_directory = os.path.dirname(directory)
-        return parent_directory
 
     def _load_project_state(self):
         """Load project state from the JSON file or return an empty dictionary if the file doesn't exist."""

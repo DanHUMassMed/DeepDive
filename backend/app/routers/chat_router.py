@@ -9,9 +9,9 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, FastAPI,
 from fastapi import HTTPException
 from typing import Dict
 import asyncio
-from app.chat_manager import ChatManager
-from app.chat_history_manager import ChatHistoryManager
-from app.project_state_manager import ProjectStateManager
+from app.managers.chat_manager import ChatManager
+from app.managers.chat_history_manager import ChatHistoryManager
+from app.managers.project_state_manager import ProjectStateManager
 
 
     
@@ -71,7 +71,7 @@ async def websocket_chat(websocket: WebSocket, connection_id: str):
         cancellation_tokens.pop(connection_id, None)
 
 # Route to cancel an active WebSocket connection
-@router.post("/cancel/{connection_id}")
+@router.post("/cancel/{connection_id}", tags=["chat"])
 async def cancel_connection(connection_id: str):
     if connection_id in active_connections:
         cancellation_tokens[connection_id].set()  # Trigger the cancellation event
@@ -79,7 +79,7 @@ async def cancel_connection(connection_id: str):
     return {"status": "FAILED", "message": "No active connection found."}
 
 
-@router.get("/{project_id}/interactions/{chat_id}", tags=["project"])
+@router.get("/{project_id}/interactions/{chat_id}", tags=["chat"])
 @trace(logger)
 async def get_chat_interactions(project_id: str,chat_id: str):
     logger.debug(f"Params {project_id=}")

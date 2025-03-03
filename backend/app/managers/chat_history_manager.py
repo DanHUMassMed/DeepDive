@@ -3,8 +3,8 @@ from dataclasses import asdict
 from datetime import datetime
 from typing import Optional
 
-from app.base_manager import BaseManager
-from app.project_state_manager import ProjectStateManager
+from app.managers.base_manager import BaseManager
+from app.managers.project_state_manager import ProjectStateManager
 from app.utils.logging_utilities import setup_logging, trace
 from pydantic.dataclasses import dataclass
 import inspect

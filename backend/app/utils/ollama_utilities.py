@@ -3,6 +3,8 @@ from fastapi import HTTPException
 import subprocess
 import platform
 import inspect
+import os
+import psutil
 
 from app.utils.logging_utilities import setup_logging, trace
 
@@ -38,17 +40,36 @@ def get_available_ollama_models():
     return ret_val
 
 
-
 def open_ollama():
-    """
-    Opens the Ollama application using a subprocess on macOS and handles errors if it fails to open.
-    """
-    if platform.system() == "Darwin":  # Darwin indicates macOS
-        try:
-            # Open Ollama (assuming it's a GUI app located in /Applications)
-            subprocess.run(["open", "-a", "Ollama"], check=True)
-            logger.info("Ollama opened successfully.")
-        except subprocess.CalledProcessError as e:
-            logger.error(f"Failed to open Ollama: {e}")
+    """Check if Ollama is installed, and if not running, open it."""
+    if is_program_installed("Ollama"):
+        if is_program_running("Ollama"):
+            print("Ollama is already running.")
+        else:
+            try:
+                subprocess.run(["open", "-a", "Ollama"], check=True)
+                print("Ollama opened successfully.")
+            except subprocess.CalledProcessError as e:
+                print(f"Failed to open Ollama: {e}")
     else:
-        logger.error("'open_ollama' function can only run on macOS.")
+        print("Ollama is not installed.")
+        
+def is_program_installed(program_name):
+    """Check if the program exists in the /Applications folder."""
+    app_path = f"/Applications/{program_name}.app"
+    return os.path.exists(app_path)
+
+def is_program_running(program_name):
+    """Check if a program is running based on the program name."""
+    try:
+        for proc in psutil.process_iter(['pid', 'name']):
+            try:
+                if program_name.lower() in proc.info['name'].lower():
+                    return True
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess) as e:
+                logger.error(f"Error accessing process {proc.info['pid']}: {e}", exc_info=True)
+        return False
+    except Exception as e:
+        logger.error(f"An unexpected error occurred while checking processes: {e}", exc_info=True)
+        return False
+

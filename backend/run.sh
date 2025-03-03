@@ -10,4 +10,5 @@ if [ "$3" == "ACTIVATE_DEBUG" ]; then
     export ACTIVATE_DEBUG="TRUE"
 fi
 clear
+export DEEP_DIVE_WORKSPACE="/Users/dan/Code/LLM/DeepDive/workspace/deep-dive"
 uvicorn app.main:app --reload

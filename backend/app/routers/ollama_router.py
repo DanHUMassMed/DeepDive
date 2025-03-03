@@ -1,4 +1,4 @@
-from app.project_state_manager import ProjectStateItem, ProjectStateManager
+from app.managers.project_state_manager import ProjectStateItem, ProjectStateManager
 from app.utils.logging_utilities import setup_logging, trace
 from fastapi import HTTPException
 from fastapi import APIRouter

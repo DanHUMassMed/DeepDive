@@ -3,8 +3,8 @@ import inspect
 import os
 
 from app import constants
-from app.chat_history_manager import ChatHistoryItem, ChatHistoryManager
-from app.project_state_manager import ProjectStateManager
+from app.managers.chat_history_manager import ChatHistoryItem, ChatHistoryManager
+from app.managers.project_state_manager import ProjectStateManager
 from app.utils.logging_utilities import setup_logging, trace
 from fastapi import WebSocket
 from fastapi.websockets import WebSocketState

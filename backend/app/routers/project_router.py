@@ -1,4 +1,4 @@
-from app.project_state_manager import ProjectStateItem, ProjectStateManager
+from app.managers.project_state_manager import ProjectStateItem, ProjectStateManager
 from app.utils.logging_utilities import setup_logging, trace
 from fastapi import HTTPException
 from fastapi import APIRouter
@@ -22,7 +22,7 @@ def get_project_state(project_id: str):
     return response_data
 
 
-@router.post("/state", tags=["projects"])
+@router.post("/state", tags=["project"])
 @trace(logger)
 def create_project_state(project_state_item: ProjectStateItem):
     logger.debug(f"params {project_state_item=}")

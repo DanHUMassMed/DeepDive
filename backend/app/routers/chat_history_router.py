@@ -1,8 +1,8 @@
-from app.project_state_manager import ProjectStateItem, ProjectStateManager
+from app.managers.project_state_manager import ProjectStateItem, ProjectStateManager
 from app.utils.logging_utilities import setup_logging, trace
 from fastapi import HTTPException
 from fastapi import APIRouter
-from app.chat_history_manager import ChatHistoryItem, ChatHistoryManager
+from app.managers.chat_history_manager import ChatHistoryItem, ChatHistoryManager
 import inspect
 
 logger = setup_logging()
@@ -65,7 +65,7 @@ async def set_active_chat(project_id: str, chat_id: str):
         )
     return response_data
 
-@router.post("/{project_id}/item")
+@router.post("/{project_id}/item", tags=["chat-history"])
 @trace(logger)
 def create_chat_history_item(project_id, chat_history_item: ChatHistoryItem):
     """Add a new chat history item to the list and set as the active_chat=True."""
@@ -85,7 +85,7 @@ def create_chat_history_item(project_id, chat_history_item: ChatHistoryItem):
         )
     return response_data
 
-@router.put("/{project_id}/item/{chat_id}/title")
+@router.put("/{project_id}/item/{chat_id}/title", tags=["chat-history"])
 @trace(logger)
 async def update_chat_history_item_title(project_id, chat_id,chat_history_item: ChatHistoryItem):
     """Update an existing chat history item title."""
@@ -106,7 +106,7 @@ async def update_chat_history_item_title(project_id, chat_id,chat_history_item: 
     return response_data
 
 
-@router.delete("/{project_id}/item/{chat_id}")
+@router.delete("/{project_id}/item/{chat_id}", tags=["chat-history"])
 @trace(logger)
 async def delete_chat_history_item(project_id, chat_id):
     """Delete a specific chat history item by chat_id and return status"""
