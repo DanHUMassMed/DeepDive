@@ -5,7 +5,7 @@ import { RiDeleteBinLine } from "react-icons/ri";
 import { Tooltip } from 'react-tooltip';
 import { getChatHistoryTimestamp } from "../api/projectAPI.mjs"
 import { getChatInteractions } from "../api/chatAPI.mjs"
-import { updateChatHistoryTitle, deleteChatHistoryItem } from "../api/chatHistoryAPI.mjs"
+import { updateChatHistoryTitle, deleteChatHistoryItem, setActiveChat } from "../api/chatHistoryAPI.mjs"
 
 import ConfigContext from './ConfigContext';
 
@@ -23,28 +23,27 @@ const ChatHistoryItem = ({ setChatMessages, chat }) => {
 
   const handleClick = () => {
     console.log(`Bringing back chat: ${chat_title}`);
+  
+    // Fetch chat interactions and set chat messages
     getChatInteractions(project_id, chat_id)
-    .then((chatItem) => {
-      // Handle the updated chat item here
-      console.log('Updated chat items:', chatItem);
-      setChatMessages(chatItem);
-
-      return getChatHistoryTimestamp(config.project_id); // Return the promise from getChatHistoryTimestamp
-    })
-    .then((chatHistoryTimestamp) => {
-      // Handle the result of getChatHistoryTimestamp
-      setConfig((prevConfig) => ({
-        ...prevConfig,
-        chat_history_timestamp: chatHistoryTimestamp,
-      }));
-      handleModalClose();
-    })
-    .catch((error) => {
-      // Handle any errors that occurred during the rename operation
-      console.error('Error renaming chat:', error);
-      // Optionally, handle the error (e.g., show a notification to the user)
-    });
-
+      .then((chatItems) => {
+        setChatMessages(chatItems);
+        setActiveChat(project_id, chat_id);
+  
+        // After setting chat messages, fetch the chat history timestamp
+        return getChatHistoryTimestamp(config.project_id); // Return the promise
+      })
+      .then((chatHistoryTimestamp) => {
+        // Update config with chat history timestamp
+        setConfig((prevConfig) => ({
+          ...prevConfig,
+          chat_history_timestamp: chatHistoryTimestamp,
+        }));
+      })
+      .catch((error) => {
+        // Handle any errors that occurred during the operations
+        console.error('Error bringing back chat:', error);
+      });
   };
 
   const handleEllipsisClick = (e) => {

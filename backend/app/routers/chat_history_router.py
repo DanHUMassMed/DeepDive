@@ -3,6 +3,7 @@ from app.utils.logging_utilities import setup_logging, trace
 from fastapi import HTTPException
 from fastapi import APIRouter
 from app.managers.chat_history_manager import ChatHistoryItem, ChatHistoryManager
+from app.managers.chat_manager import ChatManager
 import inspect
 
 logger = setup_logging()
@@ -76,6 +77,13 @@ def create_chat_history_item(project_id, chat_history_item: ChatHistoryItem):
                    'message':f"{project_id} and {chat_history_item.project_id} MUST be equal"}
     else:
         chat_history_manager = ChatHistoryManager.singleton()
+        active_chat_response = chat_history_manager.get_active_chat(project_id)
+        if 'chat_id' in active_chat_response:
+            chat_id = active_chat_response['chat_id']
+            chat_manager = ChatManager()
+            chat_interactions_count = chat_manager.get_chat_interactions_count(chat_id)
+            if chat_interactions_count == 0:
+                chat_history_manager.delete_chat_history_item(project_id, chat_id)
         response_data = chat_history_manager.create_chat_history_item(chat_history_item)
         
     if 'status_code' in response_data and 400 <= response_data['status_code'] <= 599:

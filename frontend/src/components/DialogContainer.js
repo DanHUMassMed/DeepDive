@@ -53,7 +53,7 @@ const DialogContainer = ({ chatMessages, setChatMessages }) => {
 
   return (
     <div className="w-full h-full p-4 flex flex-col justify-end">
-      <ChatWindow chatMessage={chatMessages} />
+      <ChatWindow chatMessages={chatMessages} />
       <ChatPrompt textareaRef={textareaRef} 
                   handleSendPrompt={handleSendPrompt} 
                   handleStopMessage={handleStopMessage} />
@@ -62,7 +62,7 @@ const DialogContainer = ({ chatMessages, setChatMessages }) => {
 };
 
 // ChatWindow Component - Holds all chat interactions (User & AI dialogs)
-const ChatWindow = ({ chatMessage }) => {
+const ChatWindow = ({ chatMessages }) => {
   const chatWindowRef = useRef(null);
 
   useEffect(() => {
@@ -70,14 +70,14 @@ const ChatWindow = ({ chatMessage }) => {
     if (chatWindowRef.current) {
       chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
     }
-  }, [chatMessage]); // Run the effect every time messages change
+  }, [chatMessages]); // Run the effect every time messages change
 
   return (
     <div
       ref={chatWindowRef} 
       className="flex-grow overflow-y-auto p-2 max-h-[calc(100vh-150px)]"
     >
-      {chatMessage.map((interaction, index) => (
+      {chatMessages.map((interaction, index) => (
         <ChatInteraction key={index} interaction={interaction} />
       ))}
     </div>
