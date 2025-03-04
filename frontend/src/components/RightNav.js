@@ -34,10 +34,8 @@ const RightNav = ({ isOpen }) => {
         const availableModels = await getAvailableModels()
         const projectState = await getProjectState(config.project_id);
         setLlmRole(projectState.project_system_prompt)
-        console.log(`=================== ${projectState.project_llm_name}`)
         setSelectedModel(projectState.project_llm_name)
         const dropdownList = modelDropDownSetup(availableModels, projectState.project_llm_name)
-        console.log(dropdownList)
         setModels(dropdownList)
         //setCurrentProjectState(projectState)
         // Check if the projectState attributes exist before setting values
@@ -63,7 +61,6 @@ const RightNav = ({ isOpen }) => {
   }, []); // Empty dependency array means it runs once on component load
 
   const handleSave = () => {
-    console.log('Saved:', llmRole);
     const projectData = {
       project_name: config.project_id,
       project_llm_name: selectedModel,

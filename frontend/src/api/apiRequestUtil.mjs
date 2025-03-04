@@ -19,7 +19,7 @@ export const apiRequest = async (method, endpoint, data = null) => {
       throw new Error('Unsupported HTTP method');
     }
 
-    console.log(JSON.stringify(response.data, null, 4));
+    //console.log(JSON.stringify(response.data, null, 4));
     return response.data;
 
   } catch (error) {

@@ -38,12 +38,10 @@ const useChatEffect = (messageToSend, setChatMessage) => {
 
       websocketRef.current.onopen = () => {
         setIsProcessing(true);
-        console.log("websocketRef.current.send(messageToSend);")
         websocketRef.current.send(messageToSend);
       };
 
       websocketRef.current.onclose = () => {
-        console.log('WebSocket connection closed');
         setIsProcessing(false);
       };
 

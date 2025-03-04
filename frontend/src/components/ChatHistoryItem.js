@@ -22,7 +22,6 @@ const ChatHistoryItem = ({ setChatMessages, chat }) => {
   const menuRef = useRef(null);
 
   const handleClick = () => {
-    console.log(`Bringing back chat: ${chat_title}`);
   
     // Fetch chat interactions and set chat messages
     getChatInteractions(project_id, chat_id)
@@ -85,11 +84,8 @@ const ChatHistoryItem = ({ setChatMessages, chat }) => {
   };
 
   const handleRename = () => {
-    console.log(`Renaming chat to: ${newName}`);
     updateChatHistoryTitle(project_id, chat_id, newName)
       .then((chatItem) => {
-        // Handle the updated chat item here
-        console.log('Updated chat item:', chatItem);
         return getChatHistoryTimestamp(config.project_id); // Return the promise from getChatHistoryTimestamp
       })
       .then((chatHistoryTimestamp) => {
@@ -108,7 +104,6 @@ const ChatHistoryItem = ({ setChatMessages, chat }) => {
   };
 
   const handleDelete = () => {
-    console.log(`Deleting chat: ${chat_title}`);
     deleteChatHistoryItem(project_id, chat_id)
     .then((returnStatus) => {
       // Handle the updated chat item here

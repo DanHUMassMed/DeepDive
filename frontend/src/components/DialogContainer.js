@@ -22,7 +22,14 @@ const DialogContainer = ({ chatMessages, setChatMessages }) => {
   
   // Use the custom hook
   const { closeWebSocket } = useChatEffect(messageToSend, setChatMessages);
-  
+  useEffect(() => {
+    // Scroll to the bottom when messages change
+    if (config.isProcessingPrompt) {
+      config.isProcessingPrompt = false;
+    }
+  }, []); // Run the effect every time messages change
+
+
 
   const handleSendPrompt = (e) => {
     //TODO: If you send the exact prompt twice the second prompt will not trigger an update
@@ -144,6 +151,10 @@ const AIDialog = ({ interaction }) => {
     }
   };
 
+  // Log the content before rendering
+  console.log(`[*********************[${interaction.content}]***********************]`);
+
+
   return (
     <div className="flex items-center w-full max-w-full space-x-2 bg-gray-100 p-3 rounded-lg">
       <img
@@ -164,6 +175,7 @@ function ChatPrompt({ textareaRef, handleSendPrompt, handleStopMessage }) {
   const { config, setConfig  } = useContext(ConfigContext);
   const [isSearchEnabled, setIsSearchEnabled] = useState(false);
   const [isReasonEnabled, setIsReasonEnabled] = useState(false);
+
 
   const handleOnChangePrompt = () => {
     const textarea = textareaRef.current;

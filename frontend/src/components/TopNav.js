@@ -23,7 +23,6 @@ const TopNav = () => {
       isRightNavOpen: !prevConfig.isRightNavOpen,
     }));
 
-    console.log('toggleRightNav',config.isRightNavOpen);
   };
 
   const onNewChat = async (e) => {
