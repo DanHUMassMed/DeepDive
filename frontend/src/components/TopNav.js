@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import ConfigContext from './ConfigContext';
+import { useConfig } from './ConfigContext';
 
 import { VscLayoutSidebarLeft, VscLayoutSidebarLeftOff, VscLayoutSidebarRight, VscLayoutSidebarRightOff } from 'react-icons/vsc';
 import { HiOutlinePencilSquare } from "react-icons/hi2";
@@ -8,30 +8,22 @@ import { getChatHistoryTimestamp } from "../api/projectAPI.mjs"
 
 
 const TopNav = () => {
-  const { config, setConfig  } = useContext(ConfigContext);
+  const { persistentConfig, ephemeralConfig, updateConfig } = useConfig();
 
   const toggleLeftNav = () => {
-    setConfig((prevConfig) => ({
-      ...prevConfig,
-      isLeftNavOpen: !prevConfig.isLeftNavOpen,
-    }));
+    updateConfig({ persistent: { isLeftNavOpen: !persistentConfig.isLeftNavOpen } });
   };
 
   const toggleRightNav = () => {
-    setConfig((prevConfig) => ({
-      ...prevConfig,
-      isRightNavOpen: !prevConfig.isRightNavOpen,
-    }));
+    updateConfig({ persistent: { isRightNavOpen: !persistentConfig.isRightNavOpen } });
 
   };
 
   const onNewChat = async (e) => {
-    const newChat = await createChatHistoryItem({project_id:config.project_id})
-    const chatHistoryTimestamp = await getChatHistoryTimestamp(config.project_id)
-    setConfig((prevConfig) => ({
-      ...prevConfig,
-      chat_history_timestamp: chatHistoryTimestamp,
-    }));
+    const newChat = await createChatHistoryItem({project_id:persistentConfig.project_id})
+    const chatHistoryTimestamp = await getChatHistoryTimestamp(persistentConfig.project_id)
+    updateConfig({ persistent: { chat_history_timestamp: chatHistoryTimestamp } });
+
   };
   
   // useEffect(() => {
@@ -69,14 +61,14 @@ const TopNav = () => {
       {/* Sidebar buttons on the right */}
       <div className="flex space-x-2">
         <button onClick={toggleLeftNav} className="focus:outline-none px-1">
-          {config.isLeftNavOpen ? (
+          {persistentConfig.isLeftNavOpen ? (
             <VscLayoutSidebarLeft size={24} color="black" />
           ) : (
             <VscLayoutSidebarLeftOff size={24} color="black" />
           )}
         </button>
         <button onClick={toggleRightNav} className="focus:outline-none px-1">
-          {config.isRightNavOpen ? (
+          {persistentConfig.isRightNavOpen ? (
             <VscLayoutSidebarRight size={24} color="black" />
           ) : (
             <VscLayoutSidebarRightOff size={24} color="black" />

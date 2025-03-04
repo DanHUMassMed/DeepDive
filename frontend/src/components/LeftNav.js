@@ -1,17 +1,17 @@
 import React, { useRef, useState, useContext, useEffect } from 'react';
-import ConfigContext from './ConfigContext';
+import { useConfig } from './ConfigContext'; 
 import ChatHistoryItem from './ChatHistoryItem';
 import { IoIosSearch } from 'react-icons/io';
 import { getChatHistoryItems } from "../api/chatHistoryAPI.mjs"
 
 const LeftNav = ( { setChatMessages } ) => {
-  const { config, setConfig  } = useContext(ConfigContext);
+  const { persistentConfig, ephemeralConfig, updateConfig } = useConfig();
   const [chatHistory, setChatHistory] = useState([]);
 
   useEffect(() => {
     const fetchChatHistory = async () => {
       try {
-        const chatHistoryServer = await getChatHistoryItems(config.project_id);
+        const chatHistoryServer = await getChatHistoryItems(persistentConfig.project_id);
         setChatHistory(chatHistoryServer);
         // alert(chatHistoryServer.length);
         //alert("Left Nav");
@@ -21,16 +21,16 @@ const LeftNav = ( { setChatMessages } ) => {
       }
     };
 
-    if (config.project_id) {
+    if (persistentConfig.project_id) {
       fetchChatHistory();
     }
-  }, [config.chat_history_timestamp])
+  }, [persistentConfig.chat_history_timestamp])
 
   return (
     <div
-      className={`transition-all duration-300 ${config.isLeftNavOpen ? 'w-64' : 'w-0'} bg-gray-200 h-full text-black overflow-hidden`}
+      className={`transition-all duration-300 ${persistentConfig.isLeftNavOpen ? 'w-64' : 'w-0'} bg-gray-200 h-full text-black overflow-hidden`}
       style={{
-        zIndex: config.isLeftNavOpen ? 10 : -1,  // Ensures it's above content when open
+        zIndex: persistentConfig.isLeftNavOpen ? 10 : -1,  // Ensures it's above content when open
       }}
     >
       <SearchBar />

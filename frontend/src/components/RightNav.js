@@ -1,12 +1,13 @@
 import React, { useState, useContext, useEffect } from 'react';
-import ConfigContext from './ConfigContext';
+import { useConfig } from './ConfigContext';
 import SelectLLM from './SelectLLM';
 import SystemPrompt from './SystemPrompt';
 import { getProjectState, updateProjectState } from "../api/projectAPI.mjs"
 import { getAvailableModels } from "../api/ollamaAPI.mjs"
 
 const RightNav = ({ isOpen }) => {
-  const { config, setConfig } = useContext(ConfigContext);
+  const { persistentConfig, ephemeralConfig, updateConfig } = useConfig();
+  
   const [llmRole, setLlmRole] = useState('');
   const [selectedModel, setSelectedModel] = useState('');
   const [researchDataLocation, setResearchDataLocation] = useState('');
@@ -32,7 +33,7 @@ const RightNav = ({ isOpen }) => {
         setLoading(true);
     
         const availableModels = await getAvailableModels()
-        const projectState = await getProjectState(config.project_id);
+        const projectState = await getProjectState(persistentConfig.project_id);
         setLlmRole(projectState.project_system_prompt)
         setSelectedModel(projectState.project_llm_name)
         const dropdownList = modelDropDownSetup(availableModels, projectState.project_llm_name)
@@ -62,20 +63,20 @@ const RightNav = ({ isOpen }) => {
 
   const handleSave = () => {
     const projectData = {
-      project_name: config.project_id,
+      project_name: persistentConfig.project_id,
       project_llm_name: selectedModel,
       project_system_prompt: llmRole,
       project_data_dir:researchDataLocation,
       project_data_toggle:useLocalData
     };
-    updateProjectState(config.project_id,projectData);
+    updateProjectState(persistentConfig.project_id,projectData);
   };
 
   return (
 <div
   className={`transition-all duration-300 ${
-    config.isRightNavOpen ? 'w-7/12' : 'w-0 overflow-hidden'
-  } bg-gray-200 h-full text-black p-6 ${!config.isRightNavOpen ? 'hidden' : ''}`}
+    persistentConfig.isRightNavOpen ? 'w-7/12' : 'w-0 overflow-hidden'
+  } bg-gray-200 h-full text-black p-6 ${!persistentConfig.isRightNavOpen ? 'hidden' : ''}`}
 >
   {/* Centered Project Details Header */}
   <div className="text-center py-4">

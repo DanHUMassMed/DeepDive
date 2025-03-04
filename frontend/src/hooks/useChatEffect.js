@@ -1,14 +1,14 @@
 import { useEffect, useRef, useContext } from 'react';
-import ConfigContext from '../components/ConfigContext';
+import { useConfig } from '../components/ConfigContext';
 import { getActiveChat } from "../api/chatHistoryAPI.mjs"
 
 const useChatEffect = (messageToSend, setChatMessage) => {
-  const { config, setConfig  } = useContext(ConfigContext);
+  const { persistentConfig, ephemeralConfig, updateConfig } = useConfig();
 
   const websocketRef = useRef(null);
 
   const setIsProcessing = (isProcessing) => {
-    setConfig((prevConfig) => ({...prevConfig, isProcessingPrompt: isProcessing}));
+    updateConfig({ ephemeral: { isProcessingPrompt: isProcessing } });
   }
 
   const closeWebSocket = () => {
@@ -34,7 +34,7 @@ const useChatEffect = (messageToSend, setChatMessage) => {
 
     if (messageToSend.trim()) {
       // Initialize WebSocket connection
-      websocketRef.current = new WebSocket(`ws://localhost:8000/chat/ws/${config.project_id}`);
+      websocketRef.current = new WebSocket(`ws://localhost:8000/chat/ws/${persistentConfig.project_id}`);
 
       websocketRef.current.onopen = () => {
         setIsProcessing(true);

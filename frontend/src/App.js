@@ -10,16 +10,16 @@ import { getActiveChat } from "./api/chatHistoryAPI.mjs"
 
 function ChatContainer() {
   const [chatMessages, setChatMessages] = useState([]);
-  const { config } = useConfig();
+  const { persistentConfig, ephemeralConfig, updateConfig } = useConfig();
 
   // useEffect to refresh chatMessages when project_id changes
   useEffect(() => {
-    if (config.project_id) {
+    if (persistentConfig.project_id) {
       const fetchChatMessages = async () => {
         try {
-          const activeChat = await getActiveChat(config.project_id);
+          const activeChat = await getActiveChat(persistentConfig.project_id);
           if (activeChat && Object.keys(activeChat).length > 0) {
-            const chatItems = await getChatInteractions(config.project_id, activeChat.chat_id);
+            const chatItems = await getChatInteractions(persistentConfig.project_id, activeChat.chat_id);
             setChatMessages(chatItems);
           }
         } catch (error) {
@@ -30,8 +30,7 @@ function ChatContainer() {
 
       fetchChatMessages();
     }
-  }, [config.project_id]); // Effect depends on config.project_id
-
+  }, [persistentConfig.project_id]);
   return (
     <div className="flex h-screen flex-col">
       <TopNav />

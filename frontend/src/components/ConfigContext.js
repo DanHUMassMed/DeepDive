@@ -13,35 +13,50 @@ export const useConfig = () => {
 };
 
 // Default configuration values
-const defaultConfig = {
+const defaultPersistentConfig = {
   theme: 'dark',
   project_id: 'deep-dive',
-  chat_history_timestamp: '',
   isLeftNavOpen: true,
   isRightNavOpen: false,
+  chat_history_timestamp: '',
+};
+
+const defaultEphemeralConfig = {
   isPromptTextEntered: false,
   isProcessingPrompt: false,
 };
 
 // ConfigProvider component
 export const ConfigProvider = ({ children }) => {
-  const [config, setConfig] = useState(defaultConfig);
+  // Separate state for persistent and ephemeral attributes
+  const [persistentConfig, setPersistentConfig] = useState(defaultPersistentConfig);
+  const [ephemeralConfig, setEphemeralConfig] = useState(defaultEphemeralConfig);
 
-  // Load config from localStorage or use default config
+  // Load persistent config from localStorage or use default
   useEffect(() => {
-    const storedConfig = localStorage.getItem('appConfig');
-    if (storedConfig) {
-      setConfig(JSON.parse(storedConfig));
+    const storedPersistentConfig = localStorage.getItem('appConfig');
+    if (storedPersistentConfig) {
+      setPersistentConfig(JSON.parse(storedPersistentConfig));
     }
   }, []);
 
-  // Save config to localStorage whenever it changes
+  // Save only persistent config to localStorage
   useEffect(() => {
-    localStorage.setItem('appConfig', JSON.stringify(config));
-  }, [config]);
+    localStorage.setItem('appConfig', JSON.stringify(persistentConfig));
+  }, [persistentConfig]);
+
+  // Function to update both persistent and ephemeral config
+  const updateConfig = (newConfig) => {
+    if (newConfig.hasOwnProperty('persistent')) {
+      setPersistentConfig((prev) => ({ ...prev, ...newConfig.persistent }));
+    }
+    if (newConfig.hasOwnProperty('ephemeral')) {
+      setEphemeralConfig((prev) => ({ ...prev, ...newConfig.ephemeral }));
+    }
+  };
 
   return (
-    <ConfigContext.Provider value={{ config, setConfig }}>
+    <ConfigContext.Provider value={{ persistentConfig, ephemeralConfig, updateConfig }}>
       {children}
     </ConfigContext.Provider>
   );

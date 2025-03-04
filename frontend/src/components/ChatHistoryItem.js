@@ -7,11 +7,11 @@ import { getChatHistoryTimestamp } from "../api/projectAPI.mjs"
 import { getChatInteractions } from "../api/chatAPI.mjs"
 import { updateChatHistoryTitle, deleteChatHistoryItem, setActiveChat } from "../api/chatHistoryAPI.mjs"
 
-import ConfigContext from './ConfigContext';
+import { useConfig } from './ConfigContext'; 
 
 
 const ChatHistoryItem = ({ setChatMessages, chat }) => {
-  const { config, setConfig  } = useContext(ConfigContext);
+  const { persistentConfig, ephemeralConfig, updateConfig } = useConfig();
   const { project_id, chat_id, chat_title, chat_llm_name, chat_start_date, active_chat } = chat;
   const [showMenu, setShowMenu] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -30,14 +30,11 @@ const ChatHistoryItem = ({ setChatMessages, chat }) => {
         setActiveChat(project_id, chat_id);
   
         // After setting chat messages, fetch the chat history timestamp
-        return getChatHistoryTimestamp(config.project_id); // Return the promise
+        return getChatHistoryTimestamp(persistentConfig.project_id); // Return the promise
       })
       .then((chatHistoryTimestamp) => {
         // Update config with chat history timestamp
-        setConfig((prevConfig) => ({
-          ...prevConfig,
-          chat_history_timestamp: chatHistoryTimestamp,
-        }));
+        updateConfig({ persistent: { chat_history_timestamp: chatHistoryTimestamp } });
       })
       .catch((error) => {
         // Handle any errors that occurred during the operations
@@ -86,14 +83,11 @@ const ChatHistoryItem = ({ setChatMessages, chat }) => {
   const handleRename = () => {
     updateChatHistoryTitle(project_id, chat_id, newName)
       .then((chatItem) => {
-        return getChatHistoryTimestamp(config.project_id); // Return the promise from getChatHistoryTimestamp
+        return getChatHistoryTimestamp(persistentConfig.project_id); // Return the promise from getChatHistoryTimestamp
       })
       .then((chatHistoryTimestamp) => {
         // Handle the result of getChatHistoryTimestamp
-        setConfig((prevConfig) => ({
-          ...prevConfig,
-          chat_history_timestamp: chatHistoryTimestamp,
-        }));
+        updateConfig({ persistent: { chat_history_timestamp: chatHistoryTimestamp } });
         handleModalClose();
       })
       .catch((error) => {
@@ -108,14 +102,12 @@ const ChatHistoryItem = ({ setChatMessages, chat }) => {
     .then((returnStatus) => {
       // Handle the updated chat item here
       //TODO manage returnStatus {'status':'FAIL'}
-      return getChatHistoryTimestamp(config.project_id); // Return the promise from getChatHistoryTimestamp
+      return getChatHistoryTimestamp(persistentConfig.project_id); // Return the promise from getChatHistoryTimestamp
     })
     .then((chatHistoryTimestamp) => {
       // Handle the result of getChatHistoryTimestamp
-      setConfig((prevConfig) => ({
-        ...prevConfig,
-        chat_history_timestamp: chatHistoryTimestamp,
-      }));
+      updateConfig({ persistent: { chat_history_timestamp: chatHistoryTimestamp } });
+
       handleModalClose();
     })
     .catch((error) => {

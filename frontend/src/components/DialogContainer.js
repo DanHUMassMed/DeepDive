@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
-import ConfigContext from './ConfigContext';
+import { useConfig } from './ConfigContext'; 
+
 import Think from './Think';
 import { CiGlobe } from 'react-icons/ci';
 import { IoBulbOutline, IoArrowUpCircle, IoStop } from 'react-icons/io5';
@@ -15,7 +16,8 @@ import rehypeRaw from 'rehype-raw';
 
 // DialogContainer Component - Main container for the chat UI
 const DialogContainer = ({ chatMessages, setChatMessages }) => {
-  const { config, setConfig  } = useContext(ConfigContext);
+  const { persistentConfig, ephemeralConfig, updateConfig } = useConfig();
+
 
   const textareaRef = useRef(null);
   const [messageToSend, setMessageToSend] = useState('');
@@ -24,8 +26,8 @@ const DialogContainer = ({ chatMessages, setChatMessages }) => {
   const { closeWebSocket } = useChatEffect(messageToSend, setChatMessages);
   useEffect(() => {
     // Scroll to the bottom when messages change
-    if (config.isProcessingPrompt) {
-      config.isProcessingPrompt = false;
+    if (ephemeralConfig.isProcessingPrompt) {
+      updateConfig({ ephemeral: { isProcessingPrompt: false } });
     }
   }, []); // Run the effect every time messages change
 
@@ -37,13 +39,13 @@ const DialogContainer = ({ chatMessages, setChatMessages }) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault(); // Prevent form submission
       const userMessage = textareaRef.current.value;
-      if (!userMessage.trim() || config.isProcessingPrompt) return;
+      if (!userMessage.trim() || ephemeralConfig.isProcessingPrompt) return;
 
       // Add the user's message to the chat history
       setChatMessages((prev) => [...prev, { type: 'user', content: userMessage }]);
 
       // Send the user's message to the server
-      setConfig((prevConfig) => ({...prevConfig, isPromptTextEntered: false}));
+      updateConfig({ ephemeral: { isPromptTextEntered: false } });
       setMessageToSend(userMessage);
       textareaRef.current.value = '';
     }
@@ -52,9 +54,9 @@ const DialogContainer = ({ chatMessages, setChatMessages }) => {
 
   const handleStopMessage = (e) => {
     e.preventDefault();
-    if (config.isProcessingPrompt) {
-      cancelActiveChat(config.project_id)
-      config.isProcessingPrompt = false
+    if (ephemeralConfig.isProcessingPrompt) {
+      cancelActiveChat(persistentConfig.project_id)
+      updateConfig({ ephemeral: { isPromptTextEntered: false } });
     }
   };
 
@@ -172,7 +174,7 @@ const AIDialog = ({ interaction }) => {
 
 // ChatPrompt Component - Textarea for user input
 function ChatPrompt({ textareaRef, handleSendPrompt, handleStopMessage }) {
-  const { config, setConfig  } = useContext(ConfigContext);
+  const { ephemeralConfig, updateConfig } = useConfig();
   const [isSearchEnabled, setIsSearchEnabled] = useState(false);
   const [isReasonEnabled, setIsReasonEnabled] = useState(false);
 
@@ -181,7 +183,7 @@ function ChatPrompt({ textareaRef, handleSendPrompt, handleStopMessage }) {
     const textarea = textareaRef.current;
     textarea.style.height = 'auto'; // Reset height to auto before resizing
     textarea.style.height = `${textarea.scrollHeight}px`; // Set height to scrollHeight
-    setConfig((prevConfig) => ({...prevConfig, isPromptTextEntered: (textarea.value.trim().length > 0)}));
+    updateConfig({ ephemeral: { isPromptTextEntered: (textarea.value.trim().length > 0) } });
   };
 
     // Toggle search button
@@ -200,7 +202,7 @@ function ChatPrompt({ textareaRef, handleSendPrompt, handleStopMessage }) {
         ref={textareaRef}
         id="prompt-textarea"
         className="w-full p-2 border border-gray-300 rounded-md resize-none overflow-hidden"
-        placeholder={config.isProcessingPrompt ? 'Processing your request please wait ...' : 'Enter your prompt here...'}
+        placeholder={ephemeralConfig.isProcessingPrompt ? 'Processing your request please wait ...' : 'Enter your prompt here...'}
         onKeyDown={handleSendPrompt} // Handle key down event
         onChange={handleOnChangePrompt}
       />
@@ -232,20 +234,20 @@ function ChatPrompt({ textareaRef, handleSendPrompt, handleStopMessage }) {
 }
 
 const ChatPromptButton = ({ handleStopMessage }) => {
-  const { config, setConfig  } = useContext(ConfigContext);
+  const { ephemeralConfig } = useConfig();
   return ( <button
         className="flex items-center space-x-2"
-        disabled={!config.isProcessingPrompt}
+        disabled={!ephemeralConfig.isProcessingPrompt}
         onClick={handleStopMessage}
       >
-        {config.isProcessingPrompt ? (
+        {ephemeralConfig.isProcessingPrompt ? (
               <IoStop 
               color='blue'
               size={24}
             />
             ) : (
               <IoArrowUpCircle 
-              color={config.isPromptTextEntered ? 'blue' : 'gray'}
+              color={ephemeralConfig.isPromptTextEntered ? 'blue' : 'gray'}
               size={24}
             />
             )
