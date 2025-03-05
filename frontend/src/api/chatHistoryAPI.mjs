@@ -28,3 +28,8 @@ export const updateChatHistoryTitle = (chatHistoryItem) => {
 export const deleteChatHistoryItem = (project_id, chat_id) => {
     return apiRequest('delete', `/chat-history/${project_id}/item/${chat_id}`);
 };
+
+export const getChatHistoryTimestamp = (project_id) => {
+    return apiRequest('get', `/chat-history/${project_id}/timestamp`);
+};
+

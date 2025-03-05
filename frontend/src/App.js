@@ -30,7 +30,8 @@ function ChatContainer() {
 
       fetchChatMessages();
     }
-  }, [persistentConfig.project_id]);
+  }, [persistentConfig.project_id, persistentConfig.chat_history_timestamp]);
+
   return (
     <div className="flex h-screen flex-col">
       <TopNav />

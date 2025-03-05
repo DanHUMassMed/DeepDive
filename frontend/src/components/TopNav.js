@@ -3,8 +3,8 @@ import { useConfig } from './ConfigContext';
 
 import { VscLayoutSidebarLeft, VscLayoutSidebarLeftOff, VscLayoutSidebarRight, VscLayoutSidebarRightOff } from 'react-icons/vsc';
 import { HiOutlinePencilSquare } from "react-icons/hi2";
-import { createChatHistoryItem } from "../api/chatHistoryAPI.mjs"
-import { getChatHistoryTimestamp } from "../api/projectAPI.mjs"
+import { createChatHistoryItem, getChatHistoryTimestamp } from "../api/chatHistoryAPI.mjs"
+
 
 
 const TopNav = () => {

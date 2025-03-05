@@ -56,6 +56,8 @@ class BaseManager:
     def _search(self, key, value, return_fields=None):
         """Search for a dictionary in project_state_data where key matches value."""
         # Find the first matching item
+        # logger.debug(f"_search {key} {value} {return_fields}")
+        # logger.debug(json.dumps(self.project_state_data, indent=4))
         item = next((item for item in self.project_state_data if item.get(key) == value), None)
         
         if item is None:
@@ -77,13 +79,16 @@ class BaseManager:
     def _update(self, key, value, updated_fields):
         """Update the first dictionary in project_state_data where key matches value."""
         with BaseManager._lock:
-            for item in self.project_state_data:
+            for i, item in enumerate(self.project_state_data):
                 if item.get(key) == value:
-                    item.update(updated_fields)
+                    # Update the dictionary in place
+                    self.project_state_data[i].update(updated_fields)
                     self.__save_project_state()
-                    return item
-        
-        raise KeyError(f"Item with {key} = {value} not found.")
+                    logger.debug("Successfully updated the project state data.")
+                    return self.project_state_data[i]
+            logger.debug("No matching item found to update.")
+            return None
+            raise KeyError(f"Item with {key} = {value} not found.")
     
     def _delete(self, key, value):
         """Delete the first dictionary in project_state_data where key matches value."""

@@ -88,7 +88,7 @@ async def get_chat_interactions(project_id: str,chat_id: str):
     project_state = project_state_manager.get_project_state(project_id)
     llm_name = project_state['project_llm_name']
     system_prompt = project_state['project_system_prompt']
-    chat_manager = ChatManager(llm_name=llm_name,system_prompt=system_prompt)
+    chat_manager = ChatManager(llm_name=llm_name, system_prompt=system_prompt)
     response_data = chat_manager.get_chat_interactions(chat_id)
     logger.debug(f"{response_data=}")
     if 'status_code' in response_data and 400 <= response_data['status_code'] <= 599:
@@ -97,4 +97,25 @@ async def get_chat_interactions(project_id: str,chat_id: str):
             detail=response_data
         )
     return response_data
-        
+   
+   
+@router.get("/{project_id}/interactions_count/{chat_id}", tags=["chat"])
+@trace(logger)
+async def get_chat_interaction_count(project_id: str,chat_id: str):
+    logger.debug(f"Params {project_id=}")
+    project_state_manager = ProjectStateManager.singleton()
+    project_state = project_state_manager.get_project_state(project_id)
+    llm_name = project_state['project_llm_name']
+    system_prompt = project_state['project_system_prompt']
+    chat_manager = ChatManager(llm_name=llm_name, system_prompt=system_prompt)
+    response_data = chat_manager.get_chat_interactions_count(chat_id)
+    logger.debug(f"{response_data=}")
+    if isinstance(response_data, int):
+        return response_data  
+    else:
+        if 'status_code' in response_data and 400 <= response_data['status_code'] <= 599:
+            raise HTTPException(
+                status_code=response_data['status_code'],
+                detail=response_data
+            )
+        return response_data        

@@ -3,9 +3,8 @@ import { MdOutlineDriveFileRenameOutline } from "react-icons/md";
 import { FiShare } from "react-icons/fi";
 import { RiDeleteBinLine } from "react-icons/ri";
 import { Tooltip } from 'react-tooltip';
-import { getChatHistoryTimestamp } from "../api/projectAPI.mjs"
 import { getChatInteractions } from "../api/chatAPI.mjs"
-import { updateChatHistoryTitle, deleteChatHistoryItem, setActiveChat } from "../api/chatHistoryAPI.mjs"
+import { updateChatHistoryTitle, deleteChatHistoryItem, setActiveChat, getChatHistoryTimestamp } from "../api/chatHistoryAPI.mjs"
 
 import { useConfig } from './ConfigContext'; 
 
@@ -21,9 +20,11 @@ const ChatHistoryItem = ({ setChatMessages, chat }) => {
   const [shareLink, setShareLink] = useState(''); // For Share Link (will be implemented later)
   const menuRef = useRef(null);
 
-  const handleClick = () => {
+  const handleClickChatHistoryItem = () => {
   
-    // Fetch chat interactions and set chat messages
+    // Get the Chat Interactions for the selected ChatHistoryItem
+    // Set the Selected ChatHistoryItem as the active chat
+    // Update the chat history timestamp (Which will trigger a refresh of the DialogContext)
     getChatInteractions(project_id, chat_id)
       .then((chatItems) => {
         setChatMessages(chatItems);
@@ -98,16 +99,20 @@ const ChatHistoryItem = ({ setChatMessages, chat }) => {
   };
 
   const handleDelete = () => {
+    // Delete the selected ChatHistoryItem
+    console.log("handleDelete before chatHistoryTimestamp ",persistentConfig.chatHistoryTimestamp)
+
     deleteChatHistoryItem(project_id, chat_id)
     .then((returnStatus) => {
       // Handle the updated chat item here
       //TODO manage returnStatus {'status':'FAIL'}
-      return getChatHistoryTimestamp(persistentConfig.project_id); // Return the promise from getChatHistoryTimestamp
+      return getChatHistoryTimestamp(persistentConfig.project_id);
     })
     .then((chatHistoryTimestamp) => {
       // Handle the result of getChatHistoryTimestamp
+      console.log("handleDelete after chatHistoryTimestamp ",chatHistoryTimestamp)
       updateConfig({ persistent: { chat_history_timestamp: chatHistoryTimestamp } });
-
+      
       handleModalClose();
     })
     .catch((error) => {
@@ -129,7 +134,7 @@ const ChatHistoryItem = ({ setChatMessages, chat }) => {
     <div className="relative group">
       {/* Main Chat Button */}
       <button
-        onClick={handleClick}
+        onClick={handleClickChatHistoryItem}
         className={`block w-full text-left p-2 rounded-lg hover:bg-gray-400 focus:outline-none
           ${active_chat ? 'border border-blue-500 rounded-full' : ''}`} // Conditional blue oval
       >

@@ -27,15 +27,13 @@ class ChatHistoryManager(BaseManager):
     
     @trace(logger)
     def get_chat_history_items(self, project_id):
-        """Return a list of chat history items for the given project_id."""
+        """Return a list of chat history items for the given project_id.
+        Return an empty list if there are no items."""
         ret_val = {'status':'FAILED', 'status_code':404, 'message':f"Project id [{project_id}] not found."}
         try:
-            logger.debug("IN get_chat_history")
             found = self._search('project_id', project_id, ['chat_history_items'])
-            found_chat_history_items = found.get('chat_history_items', None)
-            if found_chat_history_items is not None:
-                return found_chat_history_items
-            return ret_val
+            found_chat_history_items = found.get('chat_history_items', [])
+            return found_chat_history_items
         except Exception as err:
             class_name = self.__class__.__name__ if hasattr(self, '__class__') else 'UnknownClass'
             method_name = inspect.currentframe().f_code.co_name
@@ -49,7 +47,6 @@ class ChatHistoryManager(BaseManager):
         """Delete all chat history items for the given project_id."""
         try:
             found = self._search('project_id', project_id, ['chat_history_items'])
-            logger.debug(f"{found=}")
             if 'chat_history_items' in found:
                 update_fields= { 'chat_history_items':[] }
                 self._update('project_id', project_id, update_fields)
@@ -67,18 +64,18 @@ class ChatHistoryManager(BaseManager):
     @trace(logger)
     def get_active_chat(self, project_id):
         """Return the active chat history item for the given project_id."""
-        ret_val = {'status':'FAILED',
-                   'status_code':404, 
-                   'message':f"No Active chat found for Project id [{project_id}]."}
         chat_history_items_found = self.get_chat_history_items(project_id)
-        
-        if isinstance(chat_history_items_found,list):
+        if chat_history_items_found == []:
+            return {'status': 'SUCCESS', 'status_code': 200, 
+                    'message':'The list is empty so no active chat found'}
+        elif isinstance(chat_history_items_found,list):
             for item in chat_history_items_found:
-                if item['active_chat']:
+                if item['active_chat']: # Find the active chat
                     return item
-            return ret_val
-        else:
-            return chat_history_items_found
+            return {'status':'FAILED', 'status_code':404, 
+                   'message':f"No Active chat found for Project id [{project_id}]."}
+        # We should not get here but if we do lets FAIL
+        return {'status':'FAILED', 'status_code':500, 'message':'Failed to find active chat.'}
 
 
     @trace(logger)
@@ -173,22 +170,21 @@ class ChatHistoryManager(BaseManager):
         """Delete a specific chat history item by chat_id and return status"""
         ret_val_success = {'status':'SUCCESS', 'status_code':200}
         ret_val_error =  {'status':'FAILED', 'status_code':400, 'message':f"The Chat ID was not found [{chat_id}]."}
-        chat_history_items_found = self.get_chat_history_items(project_id)
-        if isinstance(chat_history_items_found, dict):
-            # If it is a dictionary it is an error message
-            return chat_history_items_found
+        chat_history_items_response = self.get_chat_history_items(project_id)
+        if isinstance(chat_history_items_response, dict) and 'status' in chat_history_items_response:
+            if chat_history_items_response['status'] == 'FAILED':
+                return chat_history_items_response
 
-        for idx, existing_item in enumerate(chat_history_items_found):
+        for idx, existing_item in enumerate(chat_history_items_response):
                 if existing_item['chat_id'] == chat_id:
-                    del chat_history_items_found[idx]
-                    
+                    del chat_history_items_response[idx]
                     # If the deleted chat was the active chat select a new active chat
                     # The new active chat is always the newest chat in the list
                     if existing_item['active_chat']:
-                        if len(chat_history_items_found)>0:
-                            self._set_active_chat(chat_history_items_found, chat_history_items_found[0]['chat_id'])
+                        if len(chat_history_items_response)>0:
+                            self._set_active_chat(chat_history_items_response, chat_history_items_response[0]['chat_id'])
                     # Save the updated chat_history_items
-                    self._update_chat_and_timestamp(project_id, chat_history_items_found)
+                    self._update_chat_and_timestamp(project_id, chat_history_items_response)
                     return ret_val_success
                 
         return ret_val_error
@@ -208,8 +204,8 @@ class ChatHistoryManager(BaseManager):
     def _update_chat_history_timestamp(self, project_id):
         """Update an existing project state item if found, and save the updated list to disk."""
         chat_history_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.") + f"{datetime.now().microsecond // 1000:03d}"
-        update_fields= { 'chat_history_timestamp':chat_history_timestamp }
-        self._update('project_id', project_id, update_fields)
+        update_fields= { 'chat_history_timestamp': chat_history_timestamp }
+        return self._update('project_id', project_id, update_fields)
         
     @trace(logger)
     def _update_chat_and_timestamp(self, project_id, chat_history_items):
@@ -218,4 +214,21 @@ class ChatHistoryManager(BaseManager):
         self._update('project_id', project_id, update_fields)
         self._update_chat_history_timestamp(project_id)
         
+        
 
+    @trace(logger)
+    def get_chat_history_timestamp(self, project_id):
+        """Get an existing project state item if found, and return chat_history_timestamp."""
+        ret_val = {'status':'FAILED', 'status_code':400, 'message':f"get_chat_history_timestamp failed to return a timestamp for [{project_id}]"}
+        try:
+            return_fields = ['chat_history_timestamp']
+            chat_history_timestamp = self._search('project_id', project_id, return_fields)
+            if len(chat_history_timestamp)==1:
+                return chat_history_timestamp
+        except Exception as err:
+            class_name = self.__class__.__name__ if hasattr(self, '__class__') else 'UnknownClass'
+            method_name = inspect.currentframe().f_code.co_name
+            logger.error(f"Exception in {class_name}.{method_name} {err}")            
+            ret_val = {'status':'FAILED', 'status_code':500, 'message':str(err)}
+        
+        return ret_val

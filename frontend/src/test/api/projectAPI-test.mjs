@@ -1,5 +1,6 @@
 import test from 'ava';
-import { getProjectState, createProjectState, updateProjectState, deleteProjectState, getChatHistoryTimestamp} from '../../api/projectAPI.mjs';
+import { getProjectState, createProjectState, updateProjectState, deleteProjectState} from '../../api/projectAPI.mjs';
+import { getChatHistoryTimestamp } from '../../api/chatHistoryAPI.mjs'
 
 test('getProjectState Test', async t => {
     // Arrange
@@ -94,25 +95,3 @@ test('deleteProjectState Test', async t => {
     }
 });
 
-test('getChatHistoryTimestamp Test', async t => {
-    // Arrange
-    const project_id = 'deep-dive-test'; 
-
-    try {
-        // Act
-        const response = await getChatHistoryTimestamp(project_id);
-        
-        // Assert
-        t.truthy(response); 
-        // t.is(Array.isArray(response), true); 
-        // t.is(response.length, 1);
-        
-        // const chatItem = response[0]; 
-        // t.is(chatItem.project_id, project_id); 
-        // t.is(chatItem.chat_llm_name, 'llama3.2:1b');
-
-        console.log('Test Passed: Response:', response);
-    } catch (error) {
-        t.fail('API call failed: ' + error.message);
-    }
-});

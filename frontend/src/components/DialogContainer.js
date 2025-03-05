@@ -4,15 +4,15 @@ import { useConfig } from './ConfigContext';
 import Think from './Think';
 import { CiGlobe } from 'react-icons/ci';
 import { IoBulbOutline, IoArrowUpCircle, IoStop } from 'react-icons/io5';
-
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkHtml from 'remark-html';
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { dark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { dark, vs, prism } from "react-syntax-highlighter/dist/esm/styles/prism";
 import useChatEffect from '../hooks/useChatEffect';
 import { cancelActiveChat } from '../api/chatAPI.mjs';
 import rehypeRaw from 'rehype-raw';
+
 
 // DialogContainer Component - Main container for the chat UI
 const DialogContainer = ({ chatMessages, setChatMessages }) => {
@@ -126,13 +126,33 @@ const UserDialog = ({ interaction }) => {
 const AIDialog = ({ interaction }) => {
   const [isOpen, setIsOpen] = useState(true);
 
+  const onClick = () => {
+    alert('Button clicked!!!');
+  };
+
+  // PART OF TIME SINK OF HIDE AND SHOW THINK
+  // useEffect(() => {
+  //   const button = document.getElementById('stupid_trick')   
+  //   button.addEventListener('click', onClick);
+
+  //   return () => {
+  //     button.removeEventListener('click', handleClick);
+  //   };
+  // }, []); 
+
+
   const toggleSection = () => setIsOpen(!isOpen);
+
+  // // Preprocess function to replace <think> and </think>
+  // const preprocessMarkdown = (markdown) => {
+  //   return markdown
+  //     .replace(/<think>/g, "<div> <button id='stupid_trick' style=' background-color: #007bff; color: #fff; border: none; padding: 10px; cursor: pointer; width: 100%; text-align: left; ' >Reveal Thinking Process</button> <div id='toggleContent' style=' margin-top: 10px; padding: 10px; background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 5px; white-space: pre-wrap; display: none; '> <p>")   
+  //     .replace(/<\/think>/g, "</p> </div> </div><script>");  
+  // };
+  // const postprocess = preprocessMarkdown(interaction.content);
 
   const components = {
     // Custom rendering for <think> tags
-    think({ children, ...rest }) {
-     return  <Think>{children}</Think>
-    },
 
     code({ className, children, ...rest }) {
       const match = /language-(\w+)/.exec(className || '');
@@ -140,7 +160,7 @@ const AIDialog = ({ interaction }) => {
         <SyntaxHighlighter
           PreTag="div"
           language={match[1]}
-          style={dark}
+          style={prism}
           {...rest}
         >
           {children}
@@ -150,12 +170,15 @@ const AIDialog = ({ interaction }) => {
           {children}
         </code>
       );
-    }
+    },think({ children, ...rest }) {
+      return  <div {...rest}>{children}</div>
+     }
+ 
   };
 
-  // Log the content before rendering
-  console.log(`[*********************[${interaction.content}]***********************]`);
 
+  // Log the content before rendering
+  //console.log(`[*********************[${interaction.content}]***********************]`);
 
   return (
     <div className="flex items-center w-full max-w-full space-x-2 bg-gray-100 p-3 rounded-lg">

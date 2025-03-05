@@ -18,15 +18,22 @@ logger = setup_logging(logger_nm="test")
 
 def mock_data():
     data = [
-        {   "project_id": "first-project",
-            "project_name": "first-project",
+        {   "project_id": "one-chat-project",
+            "project_name": "one-chat-project",
             "project_start_date": "2025-01-01 09:17:27 AM",
             "chat_history_timestamp": "2025-01-01 10:22:58.635",
             "project_llm_name": "deepseek-r1:32b",
             "project_system_prompt": "Answer all questions to the best of your ability.'",
             "project_data_dir": "/User/home/dan",
             "project_data_toggle": False,
-            "chat_history_items": []
+            "chat_history_items": [{
+                    "project_id": "one-chat-project",
+                    "chat_id": "c280103e-c807-48fb-986a-c302b43e1bea",
+                    "chat_start_date": "2025-02-28 10:19:58 AM",
+                    "chat_title": "Chat on 2025-02-28 10:19:58 AM",
+                    "chat_llm_name": "deepseek-r1:32b",
+                    "active_chat": True
+                }]
         },
         {
             "project_id": "deep-dive",
@@ -85,6 +92,13 @@ def test_delete_chat_history_item(chat_history_manager):
     # Note: Since we deleted an active Chat the next chap becomes the active chat
     assert remaining_chats[0]['active_chat'] is True
 
+def test_delete_last_chat_history_item(chat_history_manager):
+    project_id='one-chat-project'
+    chat_id='c280103e-c807-48fb-986a-c302b43e1bea'
+    results = chat_history_manager.delete_chat_history_item(project_id, chat_id)
+    remaining_chats = chat_history_manager.get_chat_history_items(project_id)
+    assert len(remaining_chats) == 0
+
 
 def test_get_active_chat(chat_history_manager):
     results = chat_history_manager.get_active_chat('deep-dive')
@@ -133,4 +147,7 @@ def test_create_chat_history_item(chat_history_manager):
     assert 'chat_start_date' in results
     logger.debug(f"{inspect.currentframe().f_code.co_name} results={results}")
         
-
+        
+def test_get_chat_history_timestamp(chat_history_manager):
+    result = chat_history_manager.get_chat_history_timestamp('deep-dive')
+    assert result["chat_history_timestamp"] == "2025-02-28 10:22:58.635"

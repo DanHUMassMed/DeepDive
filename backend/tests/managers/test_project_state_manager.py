@@ -61,8 +61,7 @@ def set_env_vars():
 def project_state_manager():
     # Use a temporary file or mock file loading
     with patch('app.managers.project_state_manager.ProjectStateManager._load_project_state', return_value=mock_data()):
-        with patch('app.managers.project_state_manager.ProjectStateManager._BaseManager__save_project_state', return_value=None):
-                manager = ProjectStateManager.singleton()
+        manager = ProjectStateManager.singleton()
     yield manager
     # Cleanup the singleton instance for other tests
     logging.debug(f"Reset singleton()")
@@ -83,18 +82,31 @@ def test_delete_project_state(project_state_manager):
     result = project_state_manager.delete_project_state('deep-dive')
     assert result == {'status':'SUCCESS', 'status_code':200}
 
+    
 def test_create_project_state(project_state_manager):
     project_state_item = ProjectStateItem(project_name="project name test")
     result = project_state_manager.create_project_state(project_state_item)
     assert result['project_id'] == "project name test"
     assert result["project_name"] == "project name test"
-    assert 'project_start_date' in result
+    result = project_state_manager.get_project_state('project name test')
+    assert result["project_name"] == "project name test"
     
-        
-def test_get_chat_history_timestamp(project_state_manager):
-    result = project_state_manager.get_chat_history_timestamp('deep-dive')
-    assert result["chat_history_timestamp"] == "2025-02-28 10:22:58.635"
+
    
+def test_update_project_state(project_state_manager):
+    project_state_item = ProjectStateItem(project_name="deep-dive",project_llm_name='llm_name_change')
+    result = project_state_manager.update_project_state(project_state_item)
+    assert result['project_name'] == "deep-dive"
+    assert result["project_llm_name"] == "llm_name_change"
+
+    result = project_state_manager.get_project_state('deep-dive')
+    logging.debug(f"get_project_state {result}")
+    assert result['project_name'] == "deep-dive"
+    assert result["project_llm_name"] == "llm_name_change"
     
+
+    
+
+        
 
 

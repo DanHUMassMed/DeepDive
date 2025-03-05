@@ -112,8 +112,7 @@ class ProjectStateManager(BaseManager):
 
             updated_fields['project_data_toggle'] = project_state_item.project_data_toggle
         
-            self._update('project_id', project_state_item.project_name, updated_fields)
-            ret_val = asdict(project_state_item)
+            ret_val = self._update('project_id', project_state_item.project_name, updated_fields)
         except Exception as err:
             class_name = self.__class__.__name__ if hasattr(self, '__class__') else 'UnknownClass'
             method_name = inspect.currentframe().f_code.co_name
@@ -140,21 +139,6 @@ class ProjectStateManager(BaseManager):
             
         return ret_val
                
-    @trace(logger)
-    def get_chat_history_timestamp(self, project_id):
-        """Get an existing project state item if found, and return chat_history_timestamp."""
-        ret_val = {'status':'FAILED', 'status_code':400, 'message':f"get_chat_history_timestamp failed to return a timestamp for [{project_id}]"}
-        try:
-            return_fields = ['chat_history_timestamp']
-            chat_history_timestamp = self._search('project_id', project_id, return_fields)
-            if len(chat_history_timestamp)==1:
-                return chat_history_timestamp
-        except Exception as err:
-            class_name = self.__class__.__name__ if hasattr(self, '__class__') else 'UnknownClass'
-            method_name = inspect.currentframe().f_code.co_name
-            logger.error(f"Exception in {class_name}.{method_name} {err}")            
-            ret_val = {'status':'FAILED', 'status_code':500, 'message':str(err)}
-        
-        return ret_val
+
 
         

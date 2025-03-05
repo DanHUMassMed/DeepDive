@@ -68,19 +68,5 @@ async def delete_project_state(project_id: str):
         )
     return response_data
 
-@router.get("/{project_id}/timestamp", tags=["project"])
-@trace(logger)
-async def get_chat_history_timestamp(project_id: str):
-    logger.debug(f"Params {project_id=}")
-    project_state_manager = ProjectStateManager.singleton()
-    response_data = project_state_manager.get_chat_history_timestamp(project_id)
-    logger.debug(f"{response_data=}")
-    if 'status_code' in response_data and 400 <= response_data['status_code'] <= 599:
-        raise HTTPException(
-            status_code=response_data['status_code'],
-            detail=response_data
-        )
-    return response_data
-        
 
         

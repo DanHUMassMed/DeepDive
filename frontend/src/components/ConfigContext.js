@@ -47,6 +47,7 @@ export const ConfigProvider = ({ children }) => {
 
   // Function to update both persistent and ephemeral config
   const updateConfig = (newConfig) => {
+    console.log("newConfig ", newConfig)
     if (newConfig.hasOwnProperty('persistent')) {
       setPersistentConfig((prev) => ({ ...prev, ...newConfig.persistent }));
     }

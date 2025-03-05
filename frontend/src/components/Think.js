@@ -1,27 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+// NOT USED!!
+import React, { useState } from 'react';
 
-const Think = ({ children }) => {
+const Think = ({ children, ...rest }) => {
   const [isOpen, setIsOpen] = useState(true);
-  const isMounted = useRef(true);
 
-  useEffect(() => {
-    // Set the flag to true when the component mounts
-    isMounted.current = true;
-
-    // Cleanup function to set the flag to false when the component unmounts
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
-
-  const toggleSection = () => {
-    setIsOpen(prevState => !prevState);
-  };
-
-
+  const toggleSection = () => setIsOpen(prevState => !prevState);
 
   return (
-    <div>
+    <div {...rest} >
       <button
         onClick={toggleSection}
         style={{

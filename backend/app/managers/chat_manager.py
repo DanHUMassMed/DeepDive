@@ -86,7 +86,7 @@ class ChatManager:
     def get_chat_interactions_count(self, chat_id):
         #TODO There should be an easier and quicker way to get the interaction count
         interactions = self.get_chat_interactions(chat_id)
-        return len(interactions) % 2
+        return len(interactions) // 2
     
     @trace(logger)           
     def get_chat_interactions(self, chat_id):

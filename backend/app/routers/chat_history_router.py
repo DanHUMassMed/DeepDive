@@ -129,6 +129,20 @@ async def delete_chat_history_item(project_id, chat_id):
     return response_data
 
 
+@router.get("/{project_id}/timestamp", tags=["chat-history"])
+@trace(logger)
+async def get_chat_history_timestamp(project_id: str):
+    logger.debug(f"Params {project_id=}")
+    chat_history_manager = ChatHistoryManager.singleton()
+    response_data = chat_history_manager.get_chat_history_timestamp(project_id)
+    logger.debug(f"{response_data=}")
+    if 'status_code' in response_data and 400 <= response_data['status_code'] <= 599:
+        raise HTTPException(
+            status_code=response_data['status_code'],
+            detail=response_data
+        )
+    return response_data
+        
 
 
    

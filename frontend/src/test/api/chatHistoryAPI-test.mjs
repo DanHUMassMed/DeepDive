@@ -1,6 +1,13 @@
 
 import test from 'ava';
-import { getChatHistoryItems, deleteChatHistoryItems, getActiveChat, setActiveChat, createChatHistoryItem, updateChatHistoryTitle, deleteChatHistoryItem
+import { getChatHistoryItems, 
+    deleteChatHistoryItems, 
+    getActiveChat, 
+    setActiveChat, 
+    createChatHistoryItem, 
+    updateChatHistoryTitle, 
+    deleteChatHistoryItem,
+    getChatHistoryTimestamp
  } from '../../api/chatHistoryAPI.mjs';  
 
 test('getChatHistoryItems Test', async t => {
@@ -149,6 +156,29 @@ test('deleteChatHistoryItems Test', async t => {
         // t.is(response.project_id, project_id); 
         // t.is(response.chat_llm_name, 'llama3.2:1b');
         
+        console.log('Test Passed: Response:', response);
+    } catch (error) {
+        t.fail('API call failed: ' + error.message);
+    }
+});
+
+test('getChatHistoryTimestamp Test', async t => {
+    // Arrange
+    const project_id = 'deep-dive-test'; 
+
+    try {
+        // Act
+        const response = await getChatHistoryTimestamp(project_id);
+        
+        // Assert
+        t.truthy(response); 
+        // t.is(Array.isArray(response), true); 
+        // t.is(response.length, 1);
+        
+        // const chatItem = response[0]; 
+        // t.is(chatItem.project_id, project_id); 
+        // t.is(chatItem.chat_llm_name, 'llama3.2:1b');
+
         console.log('Test Passed: Response:', response);
     } catch (error) {
         t.fail('API call failed: ' + error.message);
