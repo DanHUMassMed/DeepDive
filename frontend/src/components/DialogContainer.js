@@ -21,9 +21,11 @@ const DialogContainer = ({ chatMessages, setChatMessages }) => {
 
   const textareaRef = useRef(null);
   const [messageToSend, setMessageToSend] = useState('');
+  const [forceRenderKey, setForceRenderKey] = useState(0);
   
   // Use the custom hook
-  const { closeWebSocket } = useChatEffect(messageToSend, setChatMessages);
+  const { closeWebSocket } = useChatEffect(messageToSend, setChatMessages, forceRenderKey);
+
   useEffect(() => {
     // Scroll to the bottom when messages change
     if (ephemeralConfig.isProcessingPrompt) {
@@ -47,6 +49,7 @@ const DialogContainer = ({ chatMessages, setChatMessages }) => {
       // Send the user's message to the server
       updateConfig({ ephemeral: { isPromptTextEntered: false } });
       setMessageToSend(userMessage);
+      setForceRenderKey(prevKey => prevKey + 1);
       textareaRef.current.value = '';
     }
   };

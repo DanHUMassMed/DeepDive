@@ -2,7 +2,7 @@ import { useEffect, useRef, useContext } from 'react';
 import { useConfig } from '../components/ConfigContext';
 import { getActiveChat } from "../api/chatHistoryAPI.mjs"
 
-const useChatEffect = (messageToSend, setChatMessage) => {
+const useChatEffect = (messageToSend, setChatMessage, forceRenderKey) => {
   const { persistentConfig, ephemeralConfig, updateConfig } = useConfig();
 
   const websocketRef = useRef(null);
@@ -76,7 +76,7 @@ const useChatEffect = (messageToSend, setChatMessage) => {
       
 
     };
-  }, [messageToSend, setChatMessage]);
+  }, [setChatMessage, forceRenderKey]);
 
   return { closeWebSocket };
 };
