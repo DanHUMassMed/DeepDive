@@ -5,11 +5,11 @@ from duckduckgo_search.exceptions import DuckDuckGoSearchException, RatelimitExc
 from tavily import TavilyClient
 
 import time
-from app.utils.logging_utilities import setup_logging
+from app.utils.logging_utilities import setup_logging, trace
 
 logger = setup_logging()
     
-
+@trace(logger)
 def ddg_search(query, max_results=5, retries=3):
     """DuckDuckGo is a free private search engine.
     As of May 2024 DuckDuckGo is Free with no search limits
@@ -28,6 +28,7 @@ def ddg_search(query, max_results=5, retries=3):
                 region="wt-wt",
                 safesearch="off",
                 timelimit="y",
+                backend="lite",
                 max_results=max_results,
             )
             break  # Exit loop if search is successful

@@ -33,8 +33,18 @@ const useChatEffect = (messageToSend, setChatMessage, forceRenderKey) => {
   useEffect(() => {
 
     if (messageToSend.trim()) {
+      
+      let tag_id = '/internally_generated';
+      if (ephemeralConfig.isSearchEnabled && ephemeralConfig.isReasonEnabled) {
+        tag_id = '/search_and_reason';
+      } else if (ephemeralConfig.isSearchEnabled) {
+        tag_id = '/search';
+      } else if (ephemeralConfig.isReasonEnabled) {
+        tag_id = '/reason';
+      }
+
       // Initialize WebSocket connection
-      websocketRef.current = new WebSocket(`ws://localhost:8000/chat/ws/${persistentConfig.project_id}`);
+      websocketRef.current = new WebSocket(`ws://localhost:8000/chat/ws/${persistentConfig.project_id}${tag_id}`);
 
       websocketRef.current.onopen = () => {
         setIsProcessing(true);

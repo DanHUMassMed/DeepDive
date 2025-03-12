@@ -36,8 +36,6 @@ const DialogContainer = ({ chatMessages, setChatMessages }) => {
 
 
   const handleSendPrompt = (e) => {
-    //TODO: If you send the exact prompt twice the second prompt will not trigger an update
-    // and this will not call the chat server
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault(); // Prevent form submission
       const userMessage = textareaRef.current.value;
@@ -49,6 +47,7 @@ const DialogContainer = ({ chatMessages, setChatMessages }) => {
       // Send the user's message to the server
       updateConfig({ ephemeral: { isPromptTextEntered: false } });
       setMessageToSend(userMessage);
+      // This make sure if we send the same message twice we still rerender
       setForceRenderKey(prevKey => prevKey + 1);
       textareaRef.current.value = '';
     }
@@ -201,9 +200,6 @@ const AIDialog = ({ interaction }) => {
 // ChatPrompt Component - Textarea for user input
 function ChatPrompt({ textareaRef, handleSendPrompt, handleStopMessage }) {
   const { ephemeralConfig, updateConfig } = useConfig();
-  const [isSearchEnabled, setIsSearchEnabled] = useState(false);
-  const [isReasonEnabled, setIsReasonEnabled] = useState(false);
-
 
   const handleOnChangePrompt = () => {
     const textarea = textareaRef.current;
@@ -214,12 +210,12 @@ function ChatPrompt({ textareaRef, handleSendPrompt, handleStopMessage }) {
 
     // Toggle search button
     const toggleSearch = () => {
-      setIsSearchEnabled(!isSearchEnabled);
+      updateConfig({ ephemeral: { isSearchEnabled: !ephemeralConfig.isSearchEnabled } });
     };
   
     // Toggle reason button
     const toggleReason = () => {
-      setIsReasonEnabled(!isReasonEnabled);
+      updateConfig({ ephemeral: { isReasonEnabled: !ephemeralConfig.isReasonEnabled } });
     };
   
   return (
@@ -238,17 +234,17 @@ function ChatPrompt({ textareaRef, handleSendPrompt, handleStopMessage }) {
         <div className="flex space-x-4">
           <button
             onClick={toggleSearch}
-            className={`flex items-center space-x-2 ${isSearchEnabled ? 'text-blue-500' : 'text-gray-500'}`}
+            className={`flex items-center space-x-2 ${ephemeralConfig.isSearchEnabled ? 'text-blue-500' : 'text-gray-500'}`}
           >
             <CiGlobe size={24} />
-            <span>{isSearchEnabled ? 'Search On' : 'Search'}</span>
+            <span>{ephemeralConfig.isSearchEnabled ? 'Search On' : 'Search'}</span>
           </button>
           <button
             onClick={toggleReason}
-            className={`flex items-center space-x-2 ${isReasonEnabled ? 'text-blue-500' : 'text-gray-500'}`}
+            className={`flex items-center space-x-2 ${ephemeralConfig.isReasonEnabled ? 'text-blue-500' : 'text-gray-500'}`}
           >
             <IoBulbOutline size={24} />
-            <span>{isReasonEnabled ? 'Reason On' : 'Reason'}</span>
+            <span>{ephemeralConfig.isReasonEnabled ? 'Reason On' : 'Reason'}</span>
           </button>
         </div>
 

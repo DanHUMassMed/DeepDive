@@ -24,6 +24,8 @@ const defaultPersistentConfig = {
 const defaultEphemeralConfig = {
   isPromptTextEntered: false,
   isProcessingPrompt: false,
+  isSearchEnabled: false,
+  isReasonEnabled: false,
 };
 
 // ConfigProvider component

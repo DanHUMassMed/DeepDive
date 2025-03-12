@@ -24,8 +24,14 @@ active_connections: Dict[str, WebSocket] = {}
 cancellation_tokens: Dict[str, asyncio.Event] = {}
 
 
-@router.websocket("/ws/{connection_id}")
-async def websocket_chat(websocket: WebSocket, connection_id: str):
+
+@router.websocket("/ws/{connection_id}/{tag_id}")
+async def websocket_chat(websocket: WebSocket, connection_id: str,tag_id: str):
+    valid_tags = {"internally_generated", "search", "reason", "search_and_reason"}
+    if tag_id not in valid_tags:
+        await websocket.close(code=1003)  # Close connection with code 1003 (unsupported data)
+        return
+    
     await websocket.accept()
     active_connections[connection_id] = websocket
     cancel_event = asyncio.Event()

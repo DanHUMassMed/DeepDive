@@ -1,11 +1,11 @@
 from app.managers.project_state_manager import ProjectStateItem, ProjectStateManager
-from app.utils.logging_utilities import setup_logging, trace
+
 from fastapi import HTTPException
 from fastapi import APIRouter
 from app.managers.chat_history_manager import ChatHistoryItem, ChatHistoryManager
 from app.managers.chat_manager import ChatManager
 import inspect
-
+from app.utils.logging_utilities import setup_logging, trace
 logger = setup_logging()
 
 router = APIRouter()

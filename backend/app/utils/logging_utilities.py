@@ -17,7 +17,30 @@ import inspect
 # Define TRACE level constant
 TRACE_LEVEL = 5
 
-# logging_util.py
+# The below provide lots of DEBUG logging that is not desired
+logging.getLogger("asyncio").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("openai").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
+logging.getLogger("hpack.hpack").setLevel(logging.WARNING)
+logging.getLogger("hpack.table").setLevel(logging.WARNING)
+logging.getLogger("langchain_community.utils.math").setLevel(logging.WARNING)
+logging.getLogger("fontTools.ttLib.ttFont").setLevel(logging.WARNING)
+logging.getLogger("fontTools.subset").setLevel(logging.WARNING)
+logging.getLogger("chardet").setLevel(logging.WARNING)
+logging.getLogger("chromadb").setLevel(logging.WARNING)
+
+def get_log_file_path(logger):
+    # Get the handlers of the logger
+    for handler in logger.handlers:
+        if isinstance(handler, logging.FileHandler):
+            # Get the file path of the FileHandler
+            log_file_path = handler.baseFilename
+            return log_file_path
+    return None
+        
+
 def setup_logging(logger_nm="app", config_path='logging_config.ini'):
     """Sets up logging configuration."""
 
