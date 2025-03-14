@@ -5,13 +5,17 @@ the `ChatOllama` class from the `langchain_ollama` package.
 """
 import os
 
+from fastapi import WebSocket
 from langchain_ollama import ChatOllama
+from app.utils.logging_utilities import setup_logging,trace
+
+logger = setup_logging()
 
 
 class OLLAMA_Model:
 
-    def __init__(self, model, temperature, max_tokens):
-
+    def __init__(self, model, temperature, max_tokens, websocket: WebSocket = None):
+        self.websocket = websocket
         self.llm = ChatOllama(
             model=model, temperature=temperature, max_tokens=max_tokens
         )
@@ -35,15 +39,24 @@ class OLLAMA_Model:
         paragraph = ""
         response = ""
 
-        # Streaming the response using the astream method from langchain
         async for chunk in self.llm.astream(messages):
             content = chunk.content
             if content is not None:
                 response += content
                 paragraph += content
-                # Potentials stream results
                 if "\n" in paragraph:
-                    print(f"{paragraph}")
+                    await self._send_output(paragraph)
                     paragraph = ""
 
+        if paragraph:
+            await self._send_output(paragraph)
+
         return response
+
+        
+
+    async def _send_output(self, content):
+        logger.debug(f"_send_output {content=}")
+        if self.websocket is not None:
+            logger.debug(f"_send_output is not None")
+            await self.websocket.send_text(content)

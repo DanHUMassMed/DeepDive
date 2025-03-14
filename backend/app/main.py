@@ -1,5 +1,6 @@
 import os
-from app.utils.logging_utilities import setup_logging
+
+from app import constants
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import debugpy
@@ -10,7 +11,6 @@ if ACTIVATE_DEBUG=="TRUE":
     debugpy.listen(("0.0.0.0", 58979))
     print("Waiting for debugger to attach...")
 
-logger = setup_logging()
 
 # localhost:8000
 # Swagger http://127.0.0.1:8000/docs#/
@@ -20,8 +20,8 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000",  # Allows React app on localhost
-        "http://127.0.0.1:3000",  # Allows React app using 127.0.0.1
+        constants.REACT_APP_LOCALHOST,  # Allows React app on localhost
+        constants.REACT_APP_127_0_0_1,  # Allows React app using 127.0.0.1
     ],  # Allows React app to make requests
     allow_credentials=True,
     allow_methods=["*"],  # Allows all HTTP methods (GET, POST, etc.)

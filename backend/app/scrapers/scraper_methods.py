@@ -18,10 +18,12 @@ from langchain_community.document_loaders.html_bs import BSHTMLLoader
 from langchain_community.document_loaders.pdf import PyMuPDFLoader
 from langchain_community.document_loaders.web_base import WebBaseLoader
 from langchain_community.retrievers.arxiv import ArxivRetriever
+
+from app.scrapers.blacklist import Blacklist
 from app.utils.logging_utilities import setup_logging, trace
 logger = setup_logging()
 
-
+blacklist = Blacklist()
 
 # Alternatively, you can disable warnings globally
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -119,8 +121,9 @@ def scrape_urls(urls):
 
     content_list = []
     try:
+        clean_urls = [url for url in urls if not blacklist.is_blacklisted(url)]
         with ThreadPoolExecutor(max_workers=20) as executor:
-            contents = executor.map(extract_data_from_link, urls)
+            contents = executor.map(extract_data_from_link, clean_urls)
         content_list = [
             content for content in contents if content["raw_content"] is not None
         ]

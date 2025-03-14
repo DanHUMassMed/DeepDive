@@ -12,7 +12,7 @@ import asyncio
 from app.managers.chat_manager import ChatManager
 from app.managers.chat_history_manager import ChatHistoryManager
 from app.managers.project_state_manager import ProjectStateManager
-
+from app.agents.search_agent import SearchAgent 
 
     
 logger = setup_logging()
@@ -32,16 +32,18 @@ async def websocket_chat(websocket: WebSocket, connection_id: str,tag_id: str):
         await websocket.close(code=1003)  # Close connection with code 1003 (unsupported data)
         return
     
+    
     await websocket.accept()
     active_connections[connection_id] = websocket
     cancel_event = asyncio.Event()
     cancellation_tokens[connection_id] = cancel_event
+
     try:
         project_state_manager = ProjectStateManager.singleton()
         project_state = project_state_manager.get_project_state(connection_id)
         llm_name = project_state['project_llm_name']
         system_prompt = project_state['project_system_prompt']
-        chat_manager = ChatManager(llm_name=llm_name,system_prompt=system_prompt)
+        chat_manager = ChatManager(llm_name=llm_name, system_prompt=system_prompt)
         
         chat_history_manager = ChatHistoryManager.singleton()
         active_chat = chat_history_manager.get_active_chat(connection_id)
@@ -62,7 +64,13 @@ async def websocket_chat(websocket: WebSocket, connection_id: str,tag_id: str):
                 return
             
             
-            await chat_manager.stream_llm_responses(websocket, prompt, chat_id)
+            if tag_id == "search":
+                search_agent = SearchAgent(websocket, chat_id)
+                await websocket.send_text("_Searching..._<br>")
+                await search_agent.generate_internet_search_report(prompt)
+
+            if tag_id == "internally_generated":
+                await chat_manager.stream_llm_responses(websocket, prompt, chat_id)
             
             # Once the streaming is complete, close the connection
             #await websocket.send_text("[DONE]")

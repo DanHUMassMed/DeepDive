@@ -113,7 +113,8 @@ class ChatManager:
         try:
             async with AsyncSqliteSaver.from_conn_string(self._db_path) as saver:
                 prompt_and_reply_graph = self._create_prompt_and_reply_graph()
-                compiled_graph = prompt_and_reply_graph.compile(checkpointer=saver)        
+                compiled_graph = prompt_and_reply_graph.compile(checkpointer=saver)    
+                    
                 async for chunk, metadata in compiled_graph.astream(
                     {"messages": input_messages},
                     config,

@@ -10,7 +10,7 @@ from app.utils.logging_utilities import setup_logging, trace
 logger = setup_logging()
     
 @trace(logger)
-def ddg_search(query, max_results=5, retries=3):
+def ddg_search(query, max_results=5, retries=3, timeout=10):
     """DuckDuckGo is a free private search engine.
     As of May 2024 DuckDuckGo is Free with no search limits
     https://duckduckgo.com/
@@ -22,7 +22,7 @@ def ddg_search(query, max_results=5, retries=3):
     attempt = 0
     while attempt < retries:
         try:
-            ddg = DDGS(timeout=10)
+            ddg = DDGS(timeout=timeout)
             search_response = ddg.text(
                 query,
                 region="wt-wt",

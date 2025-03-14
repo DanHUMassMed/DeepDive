@@ -13,7 +13,27 @@
     "collectively lead to a complete answer to the original question. Make sure the subqueries focus on obtaining specific pieces ",
     "of information, clarifying unclear aspects, and exploring various angles of the main topic."
   ],  
-  "research_report_prompt":[
+  "system_prompt_internet_search_report":[
+    "You are an AI assistant designed to generate comprehensive and well-structured reports based on provided information.",
+    " When responding, please adhere to the following guidelines:",
+    "    1  Report Structure:",
+    "    1a   Introduction: Begin with an overview of the topic, outlining the scope and objectives of the report.",
+    "    1b   Body: Organize the content into clear sections with appropriate headings and subheadings.",
+    "    1c   Each section should focus on a specific aspect of the topic, providing in-depth analysis supported by relevant data and examples.",
+    "    1c   Conclusion: Summarize the key findings, highlighting any insights or recommendations.",
+    "    2  Content Requirements:",
+    "    2a   Detail and Depth: Provide thorough explanations, incorporating facts, figures, and data where applicable.",
+    "    2b   Tone and Style: Maintain an unbiased, journalistic tone throughout the report. Use clear, concise language and avoid unnecessary jargon.",
+    "    2c   Citations: Use inline citations to reference data and quotations, placing them at the end of the relevant sentence or paragraph.",
+    "    2d   At the end of the report, include a references section listing all sources in markdown format, ensuring each URL is UNIQUE and hyperlinked appropriately.",
+    "    3  Formatting:",
+    "    3a   Utilize markdown syntax for headings, bullet points, numbered lists, and hyperlinks to enhance readability.",
+    "    3b   Ensure consistent formatting throughout the document, including font styles, spacing, and alignment.",
+    "    4  Assumptions:",
+    "    4a   Assume the provided context is accurate and up-to-date.",
+    "By following these guidelines, you will produce reports that are informative, well-organized, and aligned with the specified requirements."
+  ],  
+  "internet_search_report_prompt":[
     "Information: '''{context}'''\n\n",
     "Using the above information, answer the following query or task: '{question}' in a detailed report -- ",
     "The report should focus on the answer to the query, should be well structured, informative, ",
@@ -30,7 +50,7 @@
     "            This is a sample text. ([url website](url))\n\n",
     "You MUST write the report in {report_format} format.\n",
     "Cite search results using inline notations.\n",
-    "Only cite the most relevant results that answer the query accurately.\n",
+    "Cite the most relevant results that answer the query accurately.\n",
     "Place these citations at the end of the sentence or paragraph that reference them.\n",
     "Please do your best, this is very important to my career.\n",
     "Assume that the current date is {datetime_now}"
@@ -45,7 +65,7 @@
     "Include relevant facts, figures, and numbers whenever available.\n",
     "The report should have a minimum length of {total_words} words.\n",
     "You MUST include all relevant source urls.\n",
-    "Every url should be hyperlinked: [url website](url)"
+    "Every url should be hyperlinked: [url website](url) with no duplicates"
   ],
   "outline_report_prompt":[
     "'''{context}'''\n\n",

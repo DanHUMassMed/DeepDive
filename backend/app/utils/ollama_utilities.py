@@ -5,7 +5,7 @@ import platform
 import inspect
 import os
 import psutil
-
+from app import constants
 from app.utils.logging_utilities import setup_logging, trace
 
 logger = setup_logging()
@@ -15,7 +15,7 @@ def get_available_ollama_models():
     function_name = inspect.currentframe().f_code.co_name
     module_name = inspect.getmodule(inspect.currentframe()).__name__
 
-    url = "http://localhost:11434/api/tags"
+    url = constants.OLLAMA_URL
     try:
         logger.debug("get_available_ollama_models start")
         response = requests.get(url, timeout=5)    
