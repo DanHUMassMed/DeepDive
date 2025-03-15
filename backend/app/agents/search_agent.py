@@ -10,7 +10,7 @@ from langgraph.checkpoint.sqlite import SqliteSaver
 from app.utils.workspace_utilities import get_project_workspace
 from app.agents.prompts import Prompts
 from app.agents.llm_providers.ollama import OLLAMA_Model 
-from app.search_methods.internet_search import ddg_search
+from app.search_methods.internet_search import searxng_search
 from app.scrapers.scraper_methods import scrape_urls
 from app.embedding_methods.compressor import ContextCompressor
 
@@ -26,7 +26,7 @@ class SearchAgent():
         #TODO Make the model a configuration param
         self.llm_provider = OLLAMA_Model(model="qwen2.5-ctx_32k:32b", temperature=0, max_tokens=1000, websocket=websocket)
         #TODO Make the internet_search a configuration param
-        self.internet_search = ddg_search
+        self.internet_search = searxng_search
         
         self.visited_urls = []
 

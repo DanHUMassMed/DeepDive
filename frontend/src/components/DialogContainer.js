@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import { useConfig } from './ConfigContext'; 
 import ChatPrompt from './ChatPrompt';
-//import Markdown from 'markdown-to-jsx';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkHtml from 'remark-html';
@@ -16,7 +15,6 @@ import { cancelActiveChat } from '../api/chatAPI.mjs';
 // DialogContainer Component - Main container for the chat UI
 const DialogContainer = ({ chatMessages, setChatMessages }) => {
   const { persistentConfig, ephemeralConfig, updateConfig } = useConfig();
-
 
   const textareaRef = useRef(null);
   const [messageToSend, setMessageToSend] = useState('');
@@ -61,11 +59,13 @@ const DialogContainer = ({ chatMessages, setChatMessages }) => {
   };
 
   return (
-    <div className="w-full h-full p-4 flex flex-col justify-end">
+    <div className="flex w-full h-full p-4 flex-col justify-end">
       <ChatWindow chatMessages={chatMessages} />
+      
       <ChatPrompt textareaRef={textareaRef} 
                   handleSendPrompt={handleSendPrompt} 
                   handleStopMessage={handleStopMessage} />
+    
     </div>
   );
 };
